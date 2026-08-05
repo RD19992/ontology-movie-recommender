@@ -1,7 +1,20 @@
 from pathlib import Path
 
-from rdflib import Graph, RDF, RDFS, OWL, URIRef
+from rdflib import (
+    Graph,
+    RDF,
+    RDFS,
+    OWL,
+    URIRef,
+    Literal,
+    XSD,
+)
 
+from validators import (
+    validar_nota,
+    validar_usuario_existe,
+    validar_filme_existe,
+)
 
 # ---------------------------------------------------------
 # Configuração
@@ -13,6 +26,11 @@ ONTOLOGY_PATH = (
     / "film_recommender_ontology.ttl"
 )
 
+APP_DATA_PATH = (
+    Path(__file__).resolve().parents[1]
+    / "ontology"
+    / "app_data.ttl"
+)
 
 # ---------------------------------------------------------
 # Funções básicas
@@ -35,9 +53,23 @@ def local_name(uri):
 
 
 def carregar_ontologia():
-    """Carrega a ontologia Turtle em um grafo RDF."""
+    """
+    Carrega a ontologia principal e, se existir,
+    os dados persistidos pela aplicação.
+    """
     graph = Graph()
-    graph.parse(ONTOLOGY_PATH, format="turtle")
+
+    graph.parse(
+        ONTOLOGY_PATH,
+        format="turtle",
+    )
+
+    if APP_DATA_PATH.exists():
+        graph.parse(
+            APP_DATA_PATH,
+            format="turtle",
+        )
+
     return graph
 
 
@@ -281,6 +313,211 @@ def obter_avaliacoes(graph):
         )
 
     return avaliacoes
+
+# ---------------------------------------------------------
+# Escrita e persistência
+# ---------------------------------------------------------
+
+def uri_novo_individuo(graph, classe_uri, nome_individuo):
+    """
+    Cria uma URI para um novo indivíduo usando
+    o mesmo namespace da ontologia.
+    """
+    classe_texto = str(classe_uri)
+    nome_classe = local_name(classe_uri)
+
+    namespace = classe_texto[:-len(nome_classe)]
+
+    return URIRef(namespace + nome_individuo)
+
+
+def encontrar_avaliacao(
+    graph,
+    usuario_uri,
+    filme_uri,
+):
+    """
+    Procura uma avaliação já existente do mesmo
+    usuário para o mesmo filme.
+    """
+    prop_usuario = encontrar_entidade(
+        graph,
+        "avaliacaoFeitaPor",
+    )
+
+    prop_filme = encontrar_entidade(
+        graph,
+        "avaliaFilme",
+    )
+
+    for avaliacao in graph.subjects(
+        prop_usuario,
+        usuario_uri,
+    ):
+        if (
+            avaliacao,
+            prop_filme,
+            filme_uri,
+        ) in graph:
+            return avaliacao
+
+    return None
+
+
+def registrar_avaliacao(
+    usuario_id,
+    filme_id,
+    nota,
+):
+    """
+    Registra uma nova avaliação em RDF.
+
+    Se o usuário já avaliou o filme,
+    atualiza a nota existente.
+
+    Os novos dados são persistidos em app_data.ttl.
+    """
+
+    graph = carregar_ontologia()
+
+    filmes = obter_filmes(graph)
+    usuarios = obter_usuarios(graph)
+
+    validar_nota(nota)
+    validar_usuario_existe(
+        usuario_id,
+        usuarios,
+    )
+    validar_filme_existe(
+        filme_id,
+        filmes,
+    )
+
+    usuario_uri = encontrar_entidade(
+        graph,
+        usuario_id,
+    )
+
+    filme_uri = encontrar_entidade(
+        graph,
+        filme_id,
+    )
+
+    classe_avaliacao = encontrar_classe(
+        graph,
+        "Avaliacao",
+    )
+
+    prop_usuario = encontrar_entidade(
+        graph,
+        "avaliacaoFeitaPor",
+    )
+
+    prop_filme = encontrar_entidade(
+        graph,
+        "avaliaFilme",
+    )
+
+    prop_nota = encontrar_entidade(
+        graph,
+        "notaEstrelas",
+    )
+
+    avaliacao_uri = encontrar_avaliacao(
+        graph,
+        usuario_uri,
+        filme_uri,
+    )
+
+    nova_avaliacao = avaliacao_uri is None
+
+    if nova_avaliacao:
+        nome_avaliacao = (
+            f"Avaliacao_{usuario_id}_{filme_id}"
+        )
+
+        avaliacao_uri = uri_novo_individuo(
+            graph,
+            classe_avaliacao,
+            nome_avaliacao,
+        )
+
+    # Grafo separado contendo somente dados
+    # criados/modificados pela aplicação.
+    data_graph = Graph()
+
+    if APP_DATA_PATH.exists():
+        data_graph.parse(
+            APP_DATA_PATH,
+            format="turtle",
+        )
+
+    if nova_avaliacao:
+        data_graph.add(
+            (
+                avaliacao_uri,
+                RDF.type,
+                OWL.NamedIndividual,
+            )
+        )
+
+        data_graph.add(
+            (
+                avaliacao_uri,
+                RDF.type,
+                classe_avaliacao,
+            )
+        )
+
+        data_graph.add(
+            (
+                avaliacao_uri,
+                prop_usuario,
+                usuario_uri,
+            )
+        )
+
+        data_graph.add(
+            (
+                avaliacao_uri,
+                prop_filme,
+                filme_uri,
+            )
+        )
+
+    # Remove uma possível nota anterior que esteja
+    # no arquivo da aplicação.
+    data_graph.remove(
+        (
+            avaliacao_uri,
+            prop_nota,
+            None,
+        )
+    )
+
+    data_graph.add(
+        (
+            avaliacao_uri,
+            prop_nota,
+            Literal(
+                int(nota),
+                datatype=XSD.integer,
+            ),
+        )
+    )
+
+    data_graph.serialize(
+        destination=APP_DATA_PATH,
+        format="turtle",
+    )
+
+    return {
+        "avaliacao": local_name(avaliacao_uri),
+        "usuario": usuario_id,
+        "filme": filme_id,
+        "nota": int(nota),
+        "nova": nova_avaliacao,
+    }
 
 
 # ---------------------------------------------------------
