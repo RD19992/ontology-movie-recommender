@@ -1,0 +1,1090 @@
+@prefix : <http://www.semanticweb.org/renan/ontologia-filmes5/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@base <http://www.semanticweb.org/renan/ontologia-filmes5/> .
+
+<http://www.semanticweb.org/renan/ontologia-filmes5> rdf:type owl:Ontology .
+
+#################################################################
+#    Object Properties
+#################################################################
+
+###  http://www.semanticweb.org/renan/ontologia-filmes5#avaliacaoFeitaPor
+:avaliacaoFeitaPor rdf:type owl:ObjectProperty ;
+                   owl:inverseOf :avaliou ;
+                   rdfs:domain :Avaliacao ;
+                   rdfs:range :Usuario .
+
+
+###  http://www.semanticweb.org/renan/ontologia-filmes5#recomendacaoRecebidaPor
+:recomendacaoRecebidaPor rdf:type owl:ObjectProperty ;
+                         owl:inverseOf :recebeRecomendacao ;
+                         rdfs:domain :Recomendacao ;
+                         rdfs:range :Usuario .
+
+
+###  http://www.semanticweb.org/renan/ontologia-filmes5/atuaEm
+:atuaEm rdf:type owl:ObjectProperty ;
+        owl:inverseOf :temAtor ;
+        rdfs:domain :Ator ;
+        rdfs:range :Filme .
+
+
+###  http://www.semanticweb.org/renan/ontologia-filmes5/avaliaFilme
+:avaliaFilme rdf:type owl:ObjectProperty ;
+             rdfs:domain :Avaliacao ;
+             rdfs:range :Filme .
+
+
+###  http://www.semanticweb.org/renan/ontologia-filmes5/avaliou
+:avaliou rdf:type owl:ObjectProperty ;
+         rdfs:domain :Usuario ;
+         rdfs:range :Avaliacao .
+
+
+###  http://www.semanticweb.org/renan/ontologia-filmes5/dirige
+:dirige rdf:type owl:ObjectProperty ;
+        owl:inverseOf :temDiretor ;
+        rdfs:domain :Diretor ;
+        rdfs:range :Filme .
+
+
+###  http://www.semanticweb.org/renan/ontologia-filmes5/ganhou
+:ganhou rdf:type owl:ObjectProperty ;
+        rdfs:domain :Filme ;
+        rdfs:range :Premio .
+
+
+###  http://www.semanticweb.org/renan/ontologia-filmes5/ocorreuEm
+:ocorreuEm rdf:type owl:ObjectProperty ;
+           rdfs:domain :Premio ;
+           rdfs:range :Evento .
+
+
+###  http://www.semanticweb.org/renan/ontologia-filmes5/pertenceAoGenero
+:pertenceAoGenero rdf:type owl:ObjectProperty ;
+                  rdfs:domain :Filme ;
+                  rdfs:range :Genero .
+
+
+###  http://www.semanticweb.org/renan/ontologia-filmes5/prefereAtor
+:prefereAtor rdf:type owl:ObjectProperty ;
+             rdfs:domain :Usuario ;
+             rdfs:range :Ator .
+
+
+###  http://www.semanticweb.org/renan/ontologia-filmes5/prefereDiretor
+:prefereDiretor rdf:type owl:ObjectProperty ;
+                rdfs:domain :Usuario ;
+                rdfs:range :Diretor .
+
+
+###  http://www.semanticweb.org/renan/ontologia-filmes5/prefereGenero
+:prefereGenero rdf:type owl:ObjectProperty ;
+               rdfs:domain :Usuario ;
+               rdfs:range :Genero .
+
+
+###  http://www.semanticweb.org/renan/ontologia-filmes5/prefereIdioma
+:prefereIdioma rdf:type owl:ObjectProperty ;
+               rdfs:domain :Usuario ;
+               rdfs:range :Idioma .
+
+
+###  http://www.semanticweb.org/renan/ontologia-filmes5/prefereNacionalidade
+:prefereNacionalidade rdf:type owl:ObjectProperty ;
+                      rdfs:domain :Usuario ;
+                      rdfs:range :Pais .
+
+
+###  http://www.semanticweb.org/renan/ontologia-filmes5/produz
+:produz rdf:type owl:ObjectProperty ;
+        owl:inverseOf :temProdutor ;
+        rdfs:domain :Produtor ;
+        rdfs:range :Filme .
+
+
+###  http://www.semanticweb.org/renan/ontologia-filmes5/recebeRecomendacao
+:recebeRecomendacao rdf:type owl:ObjectProperty ;
+                    rdfs:domain :Usuario ;
+                    rdfs:range :Recomendacao .
+
+
+###  http://www.semanticweb.org/renan/ontologia-filmes5/recomendaFilme
+:recomendaFilme rdf:type owl:ObjectProperty ;
+                rdfs:domain :Recomendacao ;
+                rdfs:range :Filme .
+
+
+###  http://www.semanticweb.org/renan/ontologia-filmes5/roteiriza
+:roteiriza rdf:type owl:ObjectProperty ;
+           owl:inverseOf :temRoteirista ;
+           rdfs:domain :Roteirista ;
+           rdfs:range :Filme .
+
+
+###  http://www.semanticweb.org/renan/ontologia-filmes5/similarA
+:similarA rdf:type owl:ObjectProperty ,
+                   owl:SymmetricProperty ;
+          rdfs:domain :Usuario ;
+          rdfs:range :Usuario .
+
+
+###  http://www.semanticweb.org/renan/ontologia-filmes5/temAtor
+:temAtor rdf:type owl:ObjectProperty ;
+         rdfs:domain :Filme ;
+         rdfs:range :Ator .
+
+
+###  http://www.semanticweb.org/renan/ontologia-filmes5/temDiretor
+:temDiretor rdf:type owl:ObjectProperty ;
+            rdfs:domain :Filme ;
+            rdfs:range :Diretor .
+
+
+###  http://www.semanticweb.org/renan/ontologia-filmes5/temIdiomaFilme
+:temIdiomaFilme rdf:type owl:ObjectProperty ;
+                rdfs:domain :Filme ;
+                rdfs:range :Idioma .
+
+
+###  http://www.semanticweb.org/renan/ontologia-filmes5/temNacionalidadeFilme
+:temNacionalidadeFilme rdf:type owl:ObjectProperty ;
+                       rdfs:domain :Filme ;
+                       rdfs:range :Pais .
+
+
+###  http://www.semanticweb.org/renan/ontologia-filmes5/temNacionalidadePessoa
+:temNacionalidadePessoa rdf:type owl:ObjectProperty ;
+                        rdfs:domain :Pessoa ;
+                        rdfs:range :Pais .
+
+
+###  http://www.semanticweb.org/renan/ontologia-filmes5/temProdutor
+:temProdutor rdf:type owl:ObjectProperty ;
+             rdfs:domain :Filme ;
+             rdfs:range :Produtor .
+
+
+###  http://www.semanticweb.org/renan/ontologia-filmes5/temRoteirista
+:temRoteirista rdf:type owl:ObjectProperty ;
+               rdfs:domain :Filme ;
+               rdfs:range :Roteirista .
+
+
+#################################################################
+#    Data properties
+#################################################################
+
+###  http://www.semanticweb.org/renan/ontologia-filmes5/anoEvento
+:anoEvento rdf:type owl:DatatypeProperty ;
+           rdfs:domain :Evento ;
+           rdfs:range xsd:integer .
+
+
+###  http://www.semanticweb.org/renan/ontologia-filmes5/anoLancamento
+:anoLancamento rdf:type owl:DatatypeProperty ;
+               rdfs:domain :Filme ;
+               rdfs:range xsd:integer .
+
+
+###  http://www.semanticweb.org/renan/ontologia-filmes5/anoProducao
+:anoProducao rdf:type owl:DatatypeProperty ;
+             rdfs:domain :Filme ;
+             rdfs:range xsd:integer .
+
+
+###  http://www.semanticweb.org/renan/ontologia-filmes5/emailUsuario
+:emailUsuario rdf:type owl:DatatypeProperty ;
+              rdfs:domain :Usuario ;
+              rdfs:range xsd:string .
+
+
+###  http://www.semanticweb.org/renan/ontologia-filmes5/idadeUsuario
+:idadeUsuario rdf:type owl:DatatypeProperty ;
+              rdfs:domain :Usuario ;
+              rdfs:range xsd:integer .
+
+
+###  http://www.semanticweb.org/renan/ontologia-filmes5/nomeEvento
+:nomeEvento rdf:type owl:DatatypeProperty ;
+            rdfs:domain :Evento ;
+            rdfs:range xsd:string .
+
+
+###  http://www.semanticweb.org/renan/ontologia-filmes5/nomePessoa
+:nomePessoa rdf:type owl:DatatypeProperty ;
+            rdfs:domain :Pessoa ;
+            rdfs:range xsd:string .
+
+
+###  http://www.semanticweb.org/renan/ontologia-filmes5/nomePremio
+:nomePremio rdf:type owl:DatatypeProperty ;
+            rdfs:domain :Premio ;
+            rdfs:range xsd:string .
+
+
+###  http://www.semanticweb.org/renan/ontologia-filmes5/nomeUsuario
+:nomeUsuario rdf:type owl:DatatypeProperty ;
+             rdfs:domain :Usuario ;
+             rdfs:range xsd:string .
+
+
+###  http://www.semanticweb.org/renan/ontologia-filmes5/notaEstrelas
+:notaEstrelas rdf:type owl:DatatypeProperty ;
+              rdfs:domain :Avaliacao ;
+              rdfs:range xsd:integer .
+
+
+###  http://www.semanticweb.org/renan/ontologia-filmes5/outroContatoUsuario
+:outroContatoUsuario rdf:type owl:DatatypeProperty ;
+                     rdfs:domain :Usuario ;
+                     rdfs:range xsd:string .
+
+
+###  http://www.semanticweb.org/renan/ontologia-filmes5/pontuacaoRecomendacao
+:pontuacaoRecomendacao rdf:type owl:DatatypeProperty ;
+                       rdfs:domain :Recomendacao ;
+                       rdfs:range xsd:decimal .
+
+
+###  http://www.semanticweb.org/renan/ontologia-filmes5/tituloOriginal
+:tituloOriginal rdf:type owl:DatatypeProperty ;
+                rdfs:domain :Filme ;
+                rdfs:range xsd:string .
+
+
+###  http://www.semanticweb.org/renan/ontologia-filmes5/tituloPortugues
+:tituloPortugues rdf:type owl:DatatypeProperty ;
+                 rdfs:domain :Filme ;
+                 rdfs:range xsd:string .
+
+
+###  http://www.semanticweb.org/renan/ontologia-filmes5/whatsappUsuario
+:whatsappUsuario rdf:type owl:DatatypeProperty ;
+                 rdfs:domain :Usuario ;
+                 rdfs:range xsd:string .
+
+
+#################################################################
+#    Classes
+#################################################################
+
+###  http://www.semanticweb.org/renan/ontologia-filmes5#FilmeDocumentario
+:FilmeDocumentario rdf:type owl:Class ;
+                   rdfs:subClassOf :Filme ,
+                                   [ rdf:type owl:Restriction ;
+                                     owl:onProperty :pertenceAoGenero ;
+                                     owl:hasValue :Documentario
+                                   ] ,
+                                   [ rdf:type owl:Restriction ;
+                                     owl:onProperty :temDiretor ;
+                                     owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                     owl:onClass :Diretor
+                                   ] ,
+                                   [ rdf:type owl:Restriction ;
+                                     owl:onProperty :temAtor ;
+                                     owl:maxQualifiedCardinality "0"^^xsd:nonNegativeInteger ;
+                                     owl:onClass :Ator
+                                   ] .
+
+
+###  http://www.semanticweb.org/renan/ontologia-filmes5/Ator
+:Ator rdf:type owl:Class ;
+      rdfs:subClassOf :Pessoa .
+
+
+###  http://www.semanticweb.org/renan/ontologia-filmes5/Avaliacao
+:Avaliacao rdf:type owl:Class ;
+           rdfs:subClassOf [ rdf:type owl:Restriction ;
+                             owl:onProperty :avaliacaoFeitaPor ;
+                             owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                             owl:onClass :Usuario
+                           ] ,
+                           [ rdf:type owl:Restriction ;
+                             owl:onProperty :avaliaFilme ;
+                             owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                             owl:onClass :Filme
+                           ] ,
+                           [ rdf:type owl:Restriction ;
+                             owl:onProperty :notaEstrelas ;
+                             owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                             owl:onDataRange xsd:integer
+                           ] .
+
+
+###  http://www.semanticweb.org/renan/ontologia-filmes5/Diretor
+:Diretor rdf:type owl:Class ;
+         rdfs:subClassOf :Pessoa .
+
+
+###  http://www.semanticweb.org/renan/ontologia-filmes5/Evento
+:Evento rdf:type owl:Class .
+
+
+###  http://www.semanticweb.org/renan/ontologia-filmes5/Filme
+:Filme rdf:type owl:Class ;
+       rdfs:subClassOf [ rdf:type owl:Restriction ;
+                         owl:onProperty :pertenceAoGenero ;
+                         owl:minQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                         owl:onClass :Genero
+                       ] ,
+                       [ rdf:type owl:Restriction ;
+                         owl:onProperty :temDiretor ;
+                         owl:minQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                         owl:onClass :Diretor
+                       ] ,
+                       [ rdf:type owl:Restriction ;
+                         owl:onProperty :anoProducao ;
+                         owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                         owl:onDataRange xsd:integer
+                       ] ,
+                       [ rdf:type owl:Restriction ;
+                         owl:onProperty :tituloOriginal ;
+                         owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                         owl:onDataRange xsd:string
+                       ] .
+
+
+###  http://www.semanticweb.org/renan/ontologia-filmes5/Genero
+:Genero rdf:type owl:Class .
+
+
+###  http://www.semanticweb.org/renan/ontologia-filmes5/Idioma
+:Idioma rdf:type owl:Class .
+
+
+###  http://www.semanticweb.org/renan/ontologia-filmes5/Pais
+:Pais rdf:type owl:Class .
+
+
+###  http://www.semanticweb.org/renan/ontologia-filmes5/Pessoa
+:Pessoa rdf:type owl:Class .
+
+
+###  http://www.semanticweb.org/renan/ontologia-filmes5/Premio
+:Premio rdf:type owl:Class .
+
+
+###  http://www.semanticweb.org/renan/ontologia-filmes5/Produtor
+:Produtor rdf:type owl:Class ;
+          rdfs:subClassOf :Pessoa .
+
+
+###  http://www.semanticweb.org/renan/ontologia-filmes5/Recomendacao
+:Recomendacao rdf:type owl:Class ;
+              rdfs:subClassOf [ rdf:type owl:Restriction ;
+                                owl:onProperty :recomendacaoRecebidaPor ;
+                                owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                owl:onClass :Usuario
+                              ] ,
+                              [ rdf:type owl:Restriction ;
+                                owl:onProperty :recomendaFilme ;
+                                owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                owl:onClass :Filme
+                              ] ,
+                              [ rdf:type owl:Restriction ;
+                                owl:onProperty :pontuacaoRecomendacao ;
+                                owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                owl:onDataRange xsd:decimal
+                              ] .
+
+
+###  http://www.semanticweb.org/renan/ontologia-filmes5/Roteirista
+:Roteirista rdf:type owl:Class ;
+            rdfs:subClassOf :Pessoa .
+
+
+###  http://www.semanticweb.org/renan/ontologia-filmes5/Usuario
+:Usuario rdf:type owl:Class ;
+         rdfs:subClassOf [ rdf:type owl:Restriction ;
+                           owl:onProperty :idadeUsuario ;
+                           owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                           owl:onDataRange xsd:integer
+                         ] ,
+                         [ rdf:type owl:Restriction ;
+                           owl:onProperty :nomeUsuario ;
+                           owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                           owl:onDataRange xsd:string
+                         ] .
+
+
+#################################################################
+#    Individuals
+#################################################################
+
+###  http://www.semanticweb.org/renan/ontologia-filmes5/Acao
+:Acao rdf:type owl:NamedIndividual ,
+               :Genero .
+
+
+###  http://www.semanticweb.org/renan/ontologia-filmes5/Aventura
+:Aventura rdf:type owl:NamedIndividual ,
+                   :Genero .
+
+
+###  http://www.semanticweb.org/renan/ontologia-filmes5/Biografia
+:Biografia rdf:type owl:NamedIndividual ,
+                    :Genero .
+
+
+###  http://www.semanticweb.org/renan/ontologia-filmes5/Comedia
+:Comedia rdf:type owl:NamedIndividual ,
+                  :Genero .
+
+
+###  http://www.semanticweb.org/renan/ontologia-filmes5/Documentario
+:Documentario rdf:type owl:NamedIndividual ,
+                       :Genero .
+
+
+###  http://www.semanticweb.org/renan/ontologia-filmes5/Drama
+:Drama rdf:type owl:NamedIndividual ,
+                :Genero .
+
+
+###  http://www.semanticweb.org/renan/ontologia-filmes5/Fantasia
+:Fantasia rdf:type owl:NamedIndividual ,
+                   :Genero .
+
+
+###  http://www.semanticweb.org/renan/ontologia-filmes5/FiccaoCientifica
+:FiccaoCientifica rdf:type owl:NamedIndividual ,
+                           :Genero .
+
+
+###  http://www.semanticweb.org/renan/ontologia-filmes5/Historico
+:Historico rdf:type owl:NamedIndividual ,
+                    :Genero .
+
+
+###  http://www.semanticweb.org/renan/ontologia-filmes5/Musical
+:Musical rdf:type owl:NamedIndividual ,
+                  :Genero .
+
+
+###  http://www.semanticweb.org/renan/ontologia-filmes5/Romance
+:Romance rdf:type owl:NamedIndividual ,
+                  :Genero .
+
+
+###  http://www.semanticweb.org/renan/ontologia-filmes5/Terror
+:Terror rdf:type owl:NamedIndividual ,
+                 :Genero .
+
+#################################################################
+#    Individuals adicionados - versão v6
+#    Entidades cinematográficas reais; usuários sintéticos
+#################################################################
+
+#################################################################
+#    Países
+#################################################################
+
+:Brasil rdf:type owl:NamedIndividual , :Pais .
+
+:Argentina rdf:type owl:NamedIndividual , :Pais .
+
+:CoreiaDoSul rdf:type owl:NamedIndividual , :Pais .
+
+:Japao rdf:type owl:NamedIndividual , :Pais .
+
+:EstadosUnidos rdf:type owl:NamedIndividual , :Pais .
+
+:Espanha rdf:type owl:NamedIndividual , :Pais .
+
+
+#################################################################
+#    Idiomas
+#################################################################
+
+:Portugues rdf:type owl:NamedIndividual , :Idioma .
+
+:Espanhol rdf:type owl:NamedIndividual , :Idioma .
+
+:Coreano rdf:type owl:NamedIndividual , :Idioma .
+
+:Japones rdf:type owl:NamedIndividual , :Idioma .
+
+:Ingles rdf:type owl:NamedIndividual , :Idioma .
+
+:Frances rdf:type owl:NamedIndividual , :Idioma .
+
+
+#################################################################
+#    Pessoas reais
+#################################################################
+
+:WalterSalles rdf:type owl:NamedIndividual , :Diretor ;
+    :nomePessoa "Walter Salles" ;
+    :temNacionalidadePessoa :Brasil .
+
+:FernandaMontenegro rdf:type owl:NamedIndividual , :Ator ;
+    :nomePessoa "Fernanda Montenegro" ;
+    :temNacionalidadePessoa :Brasil .
+
+:GaelGarciaBernal rdf:type owl:NamedIndividual , :Ator ;
+    :nomePessoa "Gael García Bernal" .
+
+:FernandaTorres rdf:type owl:NamedIndividual , :Ator ;
+    :nomePessoa "Fernanda Torres" ;
+    :temNacionalidadePessoa :Brasil .
+
+:BongJoonHo rdf:type owl:NamedIndividual , :Diretor , :Roteirista ;
+    :nomePessoa "Bong Joon-ho" ;
+    :temNacionalidadePessoa :CoreiaDoSul .
+
+:SongKangHo rdf:type owl:NamedIndividual , :Ator ;
+    :nomePessoa "Song Kang-ho" ;
+    :temNacionalidadePessoa :CoreiaDoSul .
+
+:HayaoMiyazaki rdf:type owl:NamedIndividual , :Diretor , :Roteirista ;
+    :nomePessoa "Hayao Miyazaki" ;
+    :temNacionalidadePessoa :Japao .
+
+:RumiHiiragi rdf:type owl:NamedIndividual , :Ator ;
+    :nomePessoa "Rumi Hiiragi" ;
+    :temNacionalidadePessoa :Japao .
+
+:NorikoHidaka rdf:type owl:NamedIndividual , :Ator ;
+    :nomePessoa "Noriko Hidaka" ;
+    :temNacionalidadePessoa :Japao .
+
+:YojiMatsuda rdf:type owl:NamedIndividual , :Ator ;
+    :nomePessoa "Yoji Matsuda" ;
+    :temNacionalidadePessoa :Japao .
+
+:ChristopherNolan rdf:type owl:NamedIndividual , :Diretor , :Roteirista ;
+    :nomePessoa "Christopher Nolan" .
+
+:LeonardoDiCaprio rdf:type owl:NamedIndividual , :Ator ;
+    :nomePessoa "Leonardo DiCaprio" ;
+    :temNacionalidadePessoa :EstadosUnidos .
+
+:MatthewMcConaughey rdf:type owl:NamedIndividual , :Ator ;
+    :nomePessoa "Matthew McConaughey" ;
+    :temNacionalidadePessoa :EstadosUnidos .
+
+:ChristianBale rdf:type owl:NamedIndividual , :Ator ;
+    :nomePessoa "Christian Bale" .
+
+:PedroAlmodovar rdf:type owl:NamedIndividual , :Diretor , :Roteirista ;
+    :nomePessoa "Pedro Almodóvar" ;
+    :temNacionalidadePessoa :Espanha .
+
+:PenelopeCruz rdf:type owl:NamedIndividual , :Ator ;
+    :nomePessoa "Penélope Cruz" ;
+    :temNacionalidadePessoa :Espanha .
+
+:JavierCamara rdf:type owl:NamedIndividual , :Ator ;
+    :nomePessoa "Javier Cámara" ;
+    :temNacionalidadePessoa :Espanha .
+
+:PetraCosta rdf:type owl:NamedIndividual , :Diretor ;
+    :nomePessoa "Petra Costa" ;
+    :temNacionalidadePessoa :Brasil .
+
+
+#################################################################
+#    Filmes reais
+#################################################################
+
+:CentralDoBrasil rdf:type owl:NamedIndividual , :Filme ;
+    :tituloOriginal "Central do Brasil" ;
+    :tituloPortugues "Central do Brasil" ;
+    :anoProducao 1998 ;
+    :anoLancamento 1998 ;
+    :pertenceAoGenero :Drama ;
+    :temDiretor :WalterSalles ;
+    :temAtor :FernandaMontenegro ;
+    :temNacionalidadeFilme :Brasil ;
+    :temIdiomaFilme :Portugues .
+
+:DiariosDeMotocicleta rdf:type owl:NamedIndividual , :Filme ;
+    :tituloOriginal "Diarios de motocicleta" ;
+    :tituloPortugues "Diários de Motocicleta" ;
+    :anoProducao 2004 ;
+    :anoLancamento 2004 ;
+    :pertenceAoGenero :Drama , :Biografia , :Aventura ;
+    :temDiretor :WalterSalles ;
+    :temAtor :GaelGarciaBernal ;
+    :temNacionalidadeFilme :Argentina ;
+    :temIdiomaFilme :Espanhol .
+
+:AindaEstouAqui rdf:type owl:NamedIndividual , :Filme ;
+    :tituloOriginal "Ainda Estou Aqui" ;
+    :tituloPortugues "Ainda Estou Aqui" ;
+    :anoProducao 2024 ;
+    :anoLancamento 2024 ;
+    :pertenceAoGenero :Drama , :Biografia , :Historico ;
+    :temDiretor :WalterSalles ;
+    :temAtor :FernandaTorres ;
+    :temNacionalidadeFilme :Brasil ;
+    :temIdiomaFilme :Portugues .
+
+:Parasita rdf:type owl:NamedIndividual , :Filme ;
+    :tituloOriginal "기생충" ;
+    :tituloPortugues "Parasita" ;
+    :anoProducao 2019 ;
+    :anoLancamento 2019 ;
+    :pertenceAoGenero :Drama ;
+    :temDiretor :BongJoonHo ;
+    :temRoteirista :BongJoonHo ;
+    :temAtor :SongKangHo ;
+    :temNacionalidadeFilme :CoreiaDoSul ;
+    :temIdiomaFilme :Coreano .
+
+:MemoriasDeUmAssassino rdf:type owl:NamedIndividual , :Filme ;
+    :tituloOriginal "살인의 추억" ;
+    :tituloPortugues "Memórias de um Assassino" ;
+    :anoProducao 2003 ;
+    :anoLancamento 2003 ;
+    :pertenceAoGenero :Drama ;
+    :temDiretor :BongJoonHo ;
+    :temRoteirista :BongJoonHo ;
+    :temAtor :SongKangHo ;
+    :temNacionalidadeFilme :CoreiaDoSul ;
+    :temIdiomaFilme :Coreano .
+
+:OHospedeiro rdf:type owl:NamedIndividual , :Filme ;
+    :tituloOriginal "괴물" ;
+    :tituloPortugues "O Hospedeiro" ;
+    :anoProducao 2006 ;
+    :anoLancamento 2006 ;
+    :pertenceAoGenero :Terror , :Drama ;
+    :temDiretor :BongJoonHo ;
+    :temRoteirista :BongJoonHo ;
+    :temAtor :SongKangHo ;
+    :temNacionalidadeFilme :CoreiaDoSul ;
+    :temIdiomaFilme :Coreano .
+
+:AViagemDeChihiro rdf:type owl:NamedIndividual , :Filme ;
+    :tituloOriginal "千と千尋の神隠し" ;
+    :tituloPortugues "A Viagem de Chihiro" ;
+    :anoProducao 2001 ;
+    :anoLancamento 2001 ;
+    :pertenceAoGenero :Fantasia , :Aventura ;
+    :temDiretor :HayaoMiyazaki ;
+    :temRoteirista :HayaoMiyazaki ;
+    :temAtor :RumiHiiragi ;
+    :temNacionalidadeFilme :Japao ;
+    :temIdiomaFilme :Japones .
+
+:MeuAmigoTotoro rdf:type owl:NamedIndividual , :Filme ;
+    :tituloOriginal "となりのトトロ" ;
+    :tituloPortugues "Meu Amigo Totoro" ;
+    :anoProducao 1988 ;
+    :anoLancamento 1988 ;
+    :pertenceAoGenero :Fantasia ;
+    :temDiretor :HayaoMiyazaki ;
+    :temRoteirista :HayaoMiyazaki ;
+    :temAtor :NorikoHidaka ;
+    :temNacionalidadeFilme :Japao ;
+    :temIdiomaFilme :Japones .
+
+:PrincesaMononoke rdf:type owl:NamedIndividual , :Filme ;
+    :tituloOriginal "もののけ姫" ;
+    :tituloPortugues "Princesa Mononoke" ;
+    :anoProducao 1997 ;
+    :anoLancamento 1997 ;
+    :pertenceAoGenero :Fantasia , :Aventura ;
+    :temDiretor :HayaoMiyazaki ;
+    :temRoteirista :HayaoMiyazaki ;
+    :temAtor :YojiMatsuda ;
+    :temNacionalidadeFilme :Japao ;
+    :temIdiomaFilme :Japones .
+
+:AOrigem rdf:type owl:NamedIndividual , :Filme ;
+    :tituloOriginal "Inception" ;
+    :tituloPortugues "A Origem" ;
+    :anoProducao 2010 ;
+    :anoLancamento 2010 ;
+    :pertenceAoGenero :FiccaoCientifica , :Acao ;
+    :temDiretor :ChristopherNolan ;
+    :temRoteirista :ChristopherNolan ;
+    :temAtor :LeonardoDiCaprio ;
+    :temNacionalidadeFilme :EstadosUnidos ;
+    :temIdiomaFilme :Ingles .
+
+:Interestelar rdf:type owl:NamedIndividual , :Filme ;
+    :tituloOriginal "Interstellar" ;
+    :tituloPortugues "Interestelar" ;
+    :anoProducao 2014 ;
+    :anoLancamento 2014 ;
+    :pertenceAoGenero :FiccaoCientifica , :Drama ;
+    :temDiretor :ChristopherNolan ;
+    :temRoteirista :ChristopherNolan ;
+    :temAtor :MatthewMcConaughey ;
+    :temNacionalidadeFilme :EstadosUnidos ;
+    :temIdiomaFilme :Ingles .
+
+:BatmanOCavaleiroDasTrevas rdf:type owl:NamedIndividual , :Filme ;
+    :tituloOriginal "The Dark Knight" ;
+    :tituloPortugues "Batman: O Cavaleiro das Trevas" ;
+    :anoProducao 2008 ;
+    :anoLancamento 2008 ;
+    :pertenceAoGenero :Acao , :Drama ;
+    :temDiretor :ChristopherNolan ;
+    :temRoteirista :ChristopherNolan ;
+    :temAtor :ChristianBale ;
+    :temNacionalidadeFilme :EstadosUnidos ;
+    :temIdiomaFilme :Ingles .
+
+:Volver rdf:type owl:NamedIndividual , :Filme ;
+    :tituloOriginal "Volver" ;
+    :tituloPortugues "Volver" ;
+    :anoProducao 2006 ;
+    :anoLancamento 2006 ;
+    :pertenceAoGenero :Drama , :Comedia ;
+    :temDiretor :PedroAlmodovar ;
+    :temRoteirista :PedroAlmodovar ;
+    :temAtor :PenelopeCruz ;
+    :temNacionalidadeFilme :Espanha ;
+    :temIdiomaFilme :Espanhol .
+
+:FaleComEla rdf:type owl:NamedIndividual , :Filme ;
+    :tituloOriginal "Hable con ella" ;
+    :tituloPortugues "Fale com Ela" ;
+    :anoProducao 2002 ;
+    :anoLancamento 2002 ;
+    :pertenceAoGenero :Drama , :Romance ;
+    :temDiretor :PedroAlmodovar ;
+    :temRoteirista :PedroAlmodovar ;
+    :temAtor :JavierCamara ;
+    :temNacionalidadeFilme :Espanha ;
+    :temIdiomaFilme :Espanhol .
+
+:DemocraciaEmVertigem rdf:type owl:NamedIndividual , :FilmeDocumentario ;
+    :tituloOriginal "Democracia em Vertigem" ;
+    :tituloPortugues "Democracia em Vertigem" ;
+    :anoProducao 2019 ;
+    :anoLancamento 2019 ;
+    :pertenceAoGenero :Documentario ;
+    :temDiretor :PetraCosta ;
+    :temNacionalidadeFilme :Brasil ;
+    :temIdiomaFilme :Portugues .
+
+
+#################################################################
+#    Prêmios e eventos reais
+#################################################################
+
+:UrsoDeOuro1998 rdf:type owl:NamedIndividual , :Premio ;
+    :nomePremio "Urso de Ouro" .
+
+:FestivalDeBerlim1998 rdf:type owl:NamedIndividual , :Evento ;
+    :nomeEvento "Festival Internacional de Cinema de Berlim" ;
+    :anoEvento 1998 .
+
+:CentralDoBrasil :ganhou :UrsoDeOuro1998 .
+:UrsoDeOuro1998 :ocorreuEm :FestivalDeBerlim1998 .
+
+
+:PalmaDeOuro2019 rdf:type owl:NamedIndividual , :Premio ;
+    :nomePremio "Palma de Ouro" .
+
+:FestivalDeCannes2019 rdf:type owl:NamedIndividual , :Evento ;
+    :nomeEvento "Festival de Cannes" ;
+    :anoEvento 2019 .
+
+:Parasita :ganhou :PalmaDeOuro2019 .
+:PalmaDeOuro2019 :ocorreuEm :FestivalDeCannes2019 .
+
+
+:OscarMelhorAnimacao2003 rdf:type owl:NamedIndividual , :Premio ;
+    :nomePremio "Oscar de Melhor Filme de Animação" .
+
+:Oscar2003 rdf:type owl:NamedIndividual , :Evento ;
+    :nomeEvento "75th Academy Awards" ;
+    :anoEvento 2003 .
+
+:AViagemDeChihiro :ganhou :OscarMelhorAnimacao2003 .
+:OscarMelhorAnimacao2003 :ocorreuEm :Oscar2003 .
+
+
+#################################################################
+#    Usuários sintéticos
+#################################################################
+
+:UsuarioAna rdf:type owl:NamedIndividual , :Usuario ;
+    :nomeUsuario "Ana" ;
+    :idadeUsuario 29 ;
+    :emailUsuario "ana@example.org" ;
+    :prefereGenero :Drama ;
+    :prefereDiretor :WalterSalles ;
+    :prefereAtor :FernandaTorres ;
+    :prefereNacionalidade :Brasil ;
+    :prefereIdioma :Portugues .
+
+:UsuarioBruno rdf:type owl:NamedIndividual , :Usuario ;
+    :nomeUsuario "Bruno" ;
+    :idadeUsuario 34 ;
+    :emailUsuario "bruno@example.org" ;
+    :prefereGenero :Drama ;
+    :prefereDiretor :WalterSalles ;
+    :prefereAtor :FernandaMontenegro ;
+    :prefereNacionalidade :Brasil ;
+    :prefereIdioma :Portugues .
+
+:UsuarioClara rdf:type owl:NamedIndividual , :Usuario ;
+    :nomeUsuario "Clara" ;
+    :idadeUsuario 31 ;
+    :emailUsuario "clara@example.org" ;
+    :prefereGenero :FiccaoCientifica ;
+    :prefereDiretor :ChristopherNolan ;
+    :prefereAtor :LeonardoDiCaprio ;
+    :prefereNacionalidade :EstadosUnidos ;
+    :prefereIdioma :Ingles .
+
+:UsuarioDaniel rdf:type owl:NamedIndividual , :Usuario ;
+    :nomeUsuario "Daniel" ;
+    :idadeUsuario 27 ;
+    :emailUsuario "daniel@example.org" ;
+    :prefereGenero :Drama ;
+    :prefereDiretor :BongJoonHo ;
+    :prefereAtor :SongKangHo ;
+    :prefereNacionalidade :CoreiaDoSul ;
+    :prefereIdioma :Coreano .
+
+:UsuarioElisa rdf:type owl:NamedIndividual , :Usuario ;
+    :nomeUsuario "Elisa" ;
+    :idadeUsuario 38 ;
+    :emailUsuario "elisa@example.org" ;
+    :prefereGenero :Fantasia ;
+    :prefereDiretor :HayaoMiyazaki ;
+    :prefereNacionalidade :Japao ;
+    :prefereIdioma :Japones .
+
+:UsuarioFelipe rdf:type owl:NamedIndividual , :Usuario ;
+    :nomeUsuario "Felipe" ;
+    :idadeUsuario 33 ;
+    :emailUsuario "felipe@example.org" ;
+    :prefereGenero :FiccaoCientifica ;
+    :prefereDiretor :ChristopherNolan ;
+    :prefereNacionalidade :EstadosUnidos ;
+    :prefereIdioma :Ingles .
+
+:UsuarioGabriela rdf:type owl:NamedIndividual , :Usuario ;
+    :nomeUsuario "Gabriela" ;
+    :idadeUsuario 30 ;
+    :emailUsuario "gabriela@example.org" ;
+    :prefereGenero :Drama ;
+    :prefereDiretor :PedroAlmodovar ;
+    :prefereAtor :PenelopeCruz ;
+    :prefereNacionalidade :Espanha ;
+    :prefereIdioma :Espanhol .
+
+:UsuarioHenrique rdf:type owl:NamedIndividual , :Usuario ;
+    :nomeUsuario "Henrique" ;
+    :idadeUsuario 42 ;
+    :emailUsuario "henrique@example.org" ;
+    :prefereGenero :Biografia ;
+    :prefereDiretor :WalterSalles ;
+    :prefereNacionalidade :Brasil ;
+    :prefereIdioma :Portugues .
+
+:UsuarioIsabela rdf:type owl:NamedIndividual , :Usuario ;
+    :nomeUsuario "Isabela" ;
+    :idadeUsuario 25 ;
+    :emailUsuario "isabela@example.org" ;
+    :prefereGenero :Fantasia ;
+    :prefereDiretor :HayaoMiyazaki ;
+    :prefereNacionalidade :Japao ;
+    :prefereIdioma :Japones .
+
+
+#################################################################
+#    Avaliações - 30 indivíduos
+#################################################################
+
+:AvalAnaCentral rdf:type owl:NamedIndividual , :Avaliacao ;
+    :avaliacaoFeitaPor :UsuarioAna ;
+    :avaliaFilme :CentralDoBrasil ;
+    :notaEstrelas 5 .
+
+:AvalAnaAinda rdf:type owl:NamedIndividual , :Avaliacao ;
+    :avaliacaoFeitaPor :UsuarioAna ;
+    :avaliaFilme :AindaEstouAqui ;
+    :notaEstrelas 5 .
+
+:AvalAnaVolver rdf:type owl:NamedIndividual , :Avaliacao ;
+    :avaliacaoFeitaPor :UsuarioAna ;
+    :avaliaFilme :Volver ;
+    :notaEstrelas 4 .
+
+:AvalAnaOrigem rdf:type owl:NamedIndividual , :Avaliacao ;
+    :avaliacaoFeitaPor :UsuarioAna ;
+    :avaliaFilme :AOrigem ;
+    :notaEstrelas 2 .
+
+
+:AvalBrunoCentral rdf:type owl:NamedIndividual , :Avaliacao ;
+    :avaliacaoFeitaPor :UsuarioBruno ;
+    :avaliaFilme :CentralDoBrasil ;
+    :notaEstrelas 5 .
+
+:AvalBrunoAinda rdf:type owl:NamedIndividual , :Avaliacao ;
+    :avaliacaoFeitaPor :UsuarioBruno ;
+    :avaliaFilme :AindaEstouAqui ;
+    :notaEstrelas 5 .
+
+:AvalBrunoVolver rdf:type owl:NamedIndividual , :Avaliacao ;
+    :avaliacaoFeitaPor :UsuarioBruno ;
+    :avaliaFilme :Volver ;
+    :notaEstrelas 4 .
+
+:AvalBrunoFaleComEla rdf:type owl:NamedIndividual , :Avaliacao ;
+    :avaliacaoFeitaPor :UsuarioBruno ;
+    :avaliaFilme :FaleComEla ;
+    :notaEstrelas 4 .
+
+
+:AvalClaraOrigem rdf:type owl:NamedIndividual , :Avaliacao ;
+    :avaliacaoFeitaPor :UsuarioClara ;
+    :avaliaFilme :AOrigem ;
+    :notaEstrelas 5 .
+
+:AvalClaraInterestelar rdf:type owl:NamedIndividual , :Avaliacao ;
+    :avaliacaoFeitaPor :UsuarioClara ;
+    :avaliaFilme :Interestelar ;
+    :notaEstrelas 5 .
+
+:AvalClaraBatman rdf:type owl:NamedIndividual , :Avaliacao ;
+    :avaliacaoFeitaPor :UsuarioClara ;
+    :avaliaFilme :BatmanOCavaleiroDasTrevas ;
+    :notaEstrelas 5 .
+
+:AvalClaraCentral rdf:type owl:NamedIndividual , :Avaliacao ;
+    :avaliacaoFeitaPor :UsuarioClara ;
+    :avaliaFilme :CentralDoBrasil ;
+    :notaEstrelas 2 .
+
+
+:AvalDanielParasita rdf:type owl:NamedIndividual , :Avaliacao ;
+    :avaliacaoFeitaPor :UsuarioDaniel ;
+    :avaliaFilme :Parasita ;
+    :notaEstrelas 5 .
+
+:AvalDanielMemorias rdf:type owl:NamedIndividual , :Avaliacao ;
+    :avaliacaoFeitaPor :UsuarioDaniel ;
+    :avaliaFilme :MemoriasDeUmAssassino ;
+    :notaEstrelas 5 .
+
+:AvalDanielHospedeiro rdf:type owl:NamedIndividual , :Avaliacao ;
+    :avaliacaoFeitaPor :UsuarioDaniel ;
+    :avaliaFilme :OHospedeiro ;
+    :notaEstrelas 4 .
+
+
+:AvalElisaChihiro rdf:type owl:NamedIndividual , :Avaliacao ;
+    :avaliacaoFeitaPor :UsuarioElisa ;
+    :avaliaFilme :AViagemDeChihiro ;
+    :notaEstrelas 5 .
+
+:AvalElisaTotoro rdf:type owl:NamedIndividual , :Avaliacao ;
+    :avaliacaoFeitaPor :UsuarioElisa ;
+    :avaliaFilme :MeuAmigoTotoro ;
+    :notaEstrelas 5 .
+
+:AvalElisaParasita rdf:type owl:NamedIndividual , :Avaliacao ;
+    :avaliacaoFeitaPor :UsuarioElisa ;
+    :avaliaFilme :Parasita ;
+    :notaEstrelas 3 .
+
+
+:AvalFelipeOrigem rdf:type owl:NamedIndividual , :Avaliacao ;
+    :avaliacaoFeitaPor :UsuarioFelipe ;
+    :avaliaFilme :AOrigem ;
+    :notaEstrelas 4 .
+
+:AvalFelipeInterestelar rdf:type owl:NamedIndividual , :Avaliacao ;
+    :avaliacaoFeitaPor :UsuarioFelipe ;
+    :avaliaFilme :Interestelar ;
+    :notaEstrelas 5 .
+
+:AvalFelipeParasita rdf:type owl:NamedIndividual , :Avaliacao ;
+    :avaliacaoFeitaPor :UsuarioFelipe ;
+    :avaliaFilme :Parasita ;
+    :notaEstrelas 4 .
+
+
+:AvalGabrielaVolver rdf:type owl:NamedIndividual , :Avaliacao ;
+    :avaliacaoFeitaPor :UsuarioGabriela ;
+    :avaliaFilme :Volver ;
+    :notaEstrelas 5 .
+
+:AvalGabrielaFaleComEla rdf:type owl:NamedIndividual , :Avaliacao ;
+    :avaliacaoFeitaPor :UsuarioGabriela ;
+    :avaliaFilme :FaleComEla ;
+    :notaEstrelas 5 .
+
+:AvalGabrielaAinda rdf:type owl:NamedIndividual , :Avaliacao ;
+    :avaliacaoFeitaPor :UsuarioGabriela ;
+    :avaliaFilme :AindaEstouAqui ;
+    :notaEstrelas 4 .
+
+
+:AvalHenriqueCentral rdf:type owl:NamedIndividual , :Avaliacao ;
+    :avaliacaoFeitaPor :UsuarioHenrique ;
+    :avaliaFilme :CentralDoBrasil ;
+    :notaEstrelas 4 .
+
+:AvalHenriqueDiarios rdf:type owl:NamedIndividual , :Avaliacao ;
+    :avaliacaoFeitaPor :UsuarioHenrique ;
+    :avaliaFilme :DiariosDeMotocicleta ;
+    :notaEstrelas 5 .
+
+:AvalHenriqueDemocracia rdf:type owl:NamedIndividual , :Avaliacao ;
+    :avaliacaoFeitaPor :UsuarioHenrique ;
+    :avaliaFilme :DemocraciaEmVertigem ;
+    :notaEstrelas 4 .
+
+
+:AvalIsabelaChihiro rdf:type owl:NamedIndividual , :Avaliacao ;
+    :avaliacaoFeitaPor :UsuarioIsabela ;
+    :avaliaFilme :AViagemDeChihiro ;
+    :notaEstrelas 5 .
+
+:AvalIsabelaParasita rdf:type owl:NamedIndividual , :Avaliacao ;
+    :avaliacaoFeitaPor :UsuarioIsabela ;
+    :avaliaFilme :Parasita ;
+    :notaEstrelas 4 .
+
+:AvalIsabelaOrigem rdf:type owl:NamedIndividual , :Avaliacao ;
+    :avaliacaoFeitaPor :UsuarioIsabela ;
+    :avaliaFilme :AOrigem ;
+    :notaEstrelas 4 .
+
+
+#################################################################
+#    Recomendações de exemplo - 3 indivíduos
+#################################################################
+
+:RecomendacaoAnaDiarios rdf:type owl:NamedIndividual , :Recomendacao ;
+    :recomendacaoRecebidaPor :UsuarioAna ;
+    :recomendaFilme :DiariosDeMotocicleta ;
+    :pontuacaoRecomendacao "0.92"^^xsd:decimal .
+
+:RecomendacaoClaraParasita rdf:type owl:NamedIndividual , :Recomendacao ;
+    :recomendacaoRecebidaPor :UsuarioClara ;
+    :recomendaFilme :Parasita ;
+    :pontuacaoRecomendacao "0.78"^^xsd:decimal .
+
+:RecomendacaoElisaMononoke rdf:type owl:NamedIndividual , :Recomendacao ;
+    :recomendacaoRecebidaPor :UsuarioElisa ;
+    :recomendaFilme :PrincesaMononoke ;
+    :pontuacaoRecomendacao "0.94"^^xsd:decimal .
+
+
+#################################################################
+#    Similaridades de exemplo entre usuários
+#################################################################
+
+:UsuarioAna :similarA :UsuarioBruno .
+
+:UsuarioClara :similarA :UsuarioFelipe .
+
+###  Generated by the OWL API (version 4.5.29.2024-05-13T12:11:03Z) https://github.com/owlcs/owlapi
