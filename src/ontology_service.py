@@ -1,5 +1,8 @@
 from pathlib import Path
 
+import re
+import unicodedata
+
 from rdflib import (
     Graph,
     RDF,
@@ -14,6 +17,10 @@ from src.validators import (
     validar_nota,
     validar_usuario_existe,
     validar_filme_existe,
+    validar_nome_usuario,
+    validar_idade_usuario,
+    validar_contato_usuario,
+    validar_preferencias_usuario,
 )
 
 # ---------------------------------------------------------
@@ -519,6 +526,290 @@ def registrar_avaliacao(
         "nova": nova_avaliacao,
     }
 
+def gerar_id_usuario(nome):
+    """
+    Converte um nome humano em ID RDF simples.
+
+    Exemplo:
+        João da Silva -> UsuarioJoaoDaSilva
+    """
+
+    texto = unicodedata.normalize(
+        "NFKD",
+        nome.strip(),
+    ).encode(
+        "ascii",
+        "ignore",
+    ).decode("ascii")
+
+    partes = re.findall(
+        r"[A-Za-z0-9]+",
+        texto,
+    )
+
+    if not partes:
+        raise ValueError(
+            "Não foi possível gerar um identificador para o usuário."
+        )
+
+    identificador = "".join(
+        parte[:1].upper() + parte[1:]
+        for parte in partes
+    )
+
+    return "Usuario" + identificador
+
+def listar_opcoes_preferencia(graph):
+    """
+    Retorna os indivíduos que podem ser escolhidos
+    como preferências no cadastro de usuário.
+    """
+
+    return {
+        "generos": [
+            local_name(item)
+            for item in listar_individuos(
+                graph,
+                "Genero",
+            )
+        ],
+        "diretores": [
+            local_name(item)
+            for item in listar_individuos(
+                graph,
+                "Diretor",
+            )
+        ],
+        "atores": [
+            local_name(item)
+            for item in listar_individuos(
+                graph,
+                "Ator",
+            )
+        ],
+        "nacionalidades": [
+            local_name(item)
+            for item in listar_individuos(
+                graph,
+                "Pais",
+            )
+        ],
+        "idiomas": [
+            local_name(item)
+            for item in listar_individuos(
+                graph,
+                "Idioma",
+            )
+        ],
+    }
+
+def registrar_usuario(
+    nome,
+    idade,
+    email="",
+    whatsapp="",
+    outro_contato="",
+    generos=None,
+    diretores=None,
+    atores=None,
+    nacionalidades=None,
+    idiomas=None,
+):
+    """
+    Cria um novo indivíduo Usuario e persiste seus
+    dados e preferências em app_data.ttl.
+    """
+
+    generos = generos or []
+    diretores = diretores or []
+    atores = atores or []
+    nacionalidades = nacionalidades or []
+    idiomas = idiomas or []
+
+    preferencias = {
+        "generos": generos,
+        "diretores": diretores,
+        "atores": atores,
+        "nacionalidades": nacionalidades,
+        "idiomas": idiomas,
+    }
+
+    validar_nome_usuario(nome)
+    validar_idade_usuario(idade)
+
+    validar_contato_usuario(
+        email=email,
+        whatsapp=whatsapp,
+        outro_contato=outro_contato,
+    )
+
+    validar_preferencias_usuario(
+        preferencias
+    )
+
+    graph = carregar_ontologia()
+
+    usuario_id = gerar_id_usuario(nome)
+
+    usuarios_existentes = {
+        usuario["id"]
+        for usuario in obter_usuarios(graph)
+    }
+
+    if usuario_id in usuarios_existentes:
+        raise ValueError(
+            f"O usuário '{nome}' já existe."
+        )
+
+    classe_usuario = encontrar_classe(
+        graph,
+        "Usuario",
+    )
+
+    usuario_uri = uri_novo_individuo(
+        graph,
+        classe_usuario,
+        usuario_id,
+    )
+
+    data_graph = Graph()
+
+    if APP_DATA_PATH.exists():
+        data_graph.parse(
+            APP_DATA_PATH,
+            format="turtle",
+        )
+
+    # -----------------------------------------------------
+    # Tipo
+    # -----------------------------------------------------
+
+    data_graph.add(
+        (
+            usuario_uri,
+            RDF.type,
+            OWL.NamedIndividual,
+        )
+    )
+
+    data_graph.add(
+        (
+            usuario_uri,
+            RDF.type,
+            classe_usuario,
+        )
+    )
+
+    # -----------------------------------------------------
+    # Data properties
+    # -----------------------------------------------------
+
+    prop_nome = encontrar_entidade(
+        graph,
+        "nomeUsuario",
+    )
+
+    prop_idade = encontrar_entidade(
+        graph,
+        "idadeUsuario",
+    )
+
+    data_graph.add(
+        (
+            usuario_uri,
+            prop_nome,
+            Literal(
+                nome.strip(),
+                datatype=XSD.string,
+            ),
+        )
+    )
+
+    data_graph.add(
+        (
+            usuario_uri,
+            prop_idade,
+            Literal(
+                idade,
+                datatype=XSD.integer,
+            ),
+        )
+    )
+
+    contatos = {
+        "emailUsuario": email,
+        "whatsappUsuario": whatsapp,
+        "outroContatoUsuario": outro_contato,
+    }
+
+    for propriedade_nome, valor in contatos.items():
+
+        valor = str(valor).strip()
+
+        if not valor:
+            continue
+
+        propriedade = encontrar_entidade(
+            graph,
+            propriedade_nome,
+        )
+
+        data_graph.add(
+            (
+                usuario_uri,
+                propriedade,
+                Literal(
+                    valor,
+                    datatype=XSD.string,
+                ),
+            )
+        )
+
+    # -----------------------------------------------------
+    # Preferências
+    # -----------------------------------------------------
+
+    propriedades_preferencia = {
+        "generos": "prefereGenero",
+        "diretores": "prefereDiretor",
+        "atores": "prefereAtor",
+        "nacionalidades": "prefereNacionalidade",
+        "idiomas": "prefereIdioma",
+    }
+
+    for categoria, valores in preferencias.items():
+
+        propriedade = encontrar_entidade(
+            graph,
+            propriedades_preferencia[categoria],
+        )
+
+        for valor_id in valores:
+
+            valor_uri = encontrar_entidade(
+                graph,
+                valor_id,
+            )
+
+            data_graph.add(
+                (
+                    usuario_uri,
+                    propriedade,
+                    valor_uri,
+                )
+            )
+
+    data_graph.serialize(
+        destination=APP_DATA_PATH,
+        format="turtle",
+    )
+
+    return {
+        "id": usuario_id,
+        "nome": nome.strip(),
+        "idade": idade,
+        "preferencias": preferencias,
+    }
 
 # ---------------------------------------------------------
 # Teste manual

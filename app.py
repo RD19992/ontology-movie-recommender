@@ -6,6 +6,8 @@ from src.ontology_service import (
     obter_usuarios,
     obter_avaliacoes,
     registrar_avaliacao,
+    registrar_usuario,
+    listar_opcoes_preferencia,
 )
 
 from src.recommender import (
@@ -46,6 +48,9 @@ filmes_por_id = {
     for filme in filmes
 }
 
+opcoes_preferencia = listar_opcoes_preferencia(
+    graph
+)
 
 # ---------------------------------------------------------
 # Cabeçalho
@@ -360,3 +365,104 @@ else:
         "Este usuário já avaliou todos os filmes "
         "do catálogo."
     )
+
+# ---------------------------------------------------------
+# Cadastro de usuário
+# ---------------------------------------------------------
+
+st.divider()
+st.header("Cadastrar novo usuário")
+
+with st.expander(
+    "Novo usuário",
+    expanded=False,
+):
+
+    with st.form("cadastro_usuario"):
+
+        nome_novo = st.text_input(
+            "Nome"
+        )
+
+        idade_nova = st.number_input(
+            "Idade",
+            min_value=1,
+            max_value=120,
+            value=25,
+            step=1,
+        )
+
+        st.subheader("Contato")
+
+        email_novo = st.text_input(
+            "E-mail"
+        )
+
+        whatsapp_novo = st.text_input(
+            "WhatsApp"
+        )
+
+        outro_contato_novo = st.text_input(
+            "Outro contato"
+        )
+
+        st.subheader("Preferências")
+
+        generos_novos = st.multiselect(
+            "Gêneros",
+            options=opcoes_preferencia["generos"],
+        )
+
+        diretores_novos = st.multiselect(
+            "Diretores",
+            options=opcoes_preferencia["diretores"],
+        )
+
+        atores_novos = st.multiselect(
+            "Atores",
+            options=opcoes_preferencia["atores"],
+        )
+
+        nacionalidades_novas = st.multiselect(
+            "Nacionalidades",
+            options=opcoes_preferencia[
+                "nacionalidades"
+            ],
+        )
+
+        idiomas_novos = st.multiselect(
+            "Idiomas",
+            options=opcoes_preferencia["idiomas"],
+        )
+
+        cadastrar = st.form_submit_button(
+            "Cadastrar usuário"
+        )
+
+        if cadastrar:
+
+            try:
+
+                resultado = registrar_usuario(
+                    nome=nome_novo,
+                    idade=int(idade_nova),
+                    email=email_novo,
+                    whatsapp=whatsapp_novo,
+                    outro_contato=outro_contato_novo,
+                    generos=generos_novos,
+                    diretores=diretores_novos,
+                    atores=atores_novos,
+                    nacionalidades=nacionalidades_novas,
+                    idiomas=idiomas_novos,
+                )
+
+                st.session_state["mensagem"] = (
+                    f"Usuário "
+                    f"{resultado['nome']} "
+                    f"cadastrado com sucesso."
+                )
+
+                st.rerun()
+
+            except ValueError as erro:
+                st.error(str(erro))
