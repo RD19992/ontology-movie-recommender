@@ -16,6 +16,10 @@ PESOS_CONTEUDO = {
     "idiomas": 0.10,
 }
 
+# Parâmetros da filtragem colaborativa
+MIN_FILMES_COMUNS = 2
+LIMIAR_SIMILARIDADE = 0.40
+FILMES_PARA_CONFIANCA_MAXIMA = 3
 
 def encontrar_usuario(usuarios, usuario_id):
     """
@@ -156,6 +160,243 @@ def recomendar_por_conteudo(
 
     return recomendacoes
 
+# ---------------------------------------------------------
+# Filtragem colaborativa
+# ---------------------------------------------------------
+
+def construir_matriz_avaliacoes(avaliacoes):
+    """
+    Constrói uma estrutura:
+
+    {
+        "UsuarioAna": {
+            "CentralDoBrasil": 5,
+            "AOrigem": 2,
+            ...
+        },
+        ...
+    }
+    """
+    matriz = {}
+
+    for avaliacao in avaliacoes:
+        usuario = avaliacao["usuario"]
+        filme = avaliacao["filme"]
+        nota = avaliacao["nota"]
+
+        if usuario is None or filme is None or nota is None:
+            continue
+
+        if usuario not in matriz:
+            matriz[usuario] = {}
+
+        matriz[usuario][filme] = float(nota)
+
+    return matriz
+
+
+def calcular_similaridade_usuarios(
+    usuario_a,
+    usuario_b,
+    matriz,
+):
+    """
+    Calcula similaridade entre dois usuários usando apenas
+    os filmes avaliados por ambos.
+
+    A similaridade considera:
+    1. diferença média entre as notas;
+    2. quantidade de filmes em comum.
+
+    Retorna:
+        similaridade entre 0 e 1
+        quantidade de filmes em comum
+    """
+
+    notas_a = matriz.get(usuario_a, {})
+    notas_b = matriz.get(usuario_b, {})
+
+    filmes_comuns = set(notas_a) & set(notas_b)
+
+    quantidade_comuns = len(filmes_comuns)
+
+    if quantidade_comuns < MIN_FILMES_COMUNS:
+        return 0.0, quantidade_comuns
+
+    diferencas = [
+        abs(notas_a[filme] - notas_b[filme])
+        for filme in filmes_comuns
+    ]
+
+    diferenca_media = sum(diferencas) / quantidade_comuns
+
+    # Como as notas vão de 1 a 5,
+    # a diferença máxima possível é 4.
+    similaridade_base = 1 - (diferenca_media / 4)
+
+    # Evita dar confiança excessiva a uma comparação
+    # feita sobre poucos filmes.
+    confianca = min(
+        quantidade_comuns / FILMES_PARA_CONFIANCA_MAXIMA,
+        1.0,
+    )
+
+    similaridade = similaridade_base * confianca
+
+    return similaridade, quantidade_comuns
+
+
+def encontrar_usuarios_similares(
+    usuario_id,
+    usuarios,
+    matriz,
+):
+    """
+    Retorna usuários suficientemente semelhantes
+    ao usuário selecionado.
+    """
+    similares = []
+
+    for usuario in usuarios:
+        outro_id = usuario["id"]
+
+        if outro_id == usuario_id:
+            continue
+
+        similaridade, filmes_comuns = (
+            calcular_similaridade_usuarios(
+                usuario_id,
+                outro_id,
+                matriz,
+            )
+        )
+
+        if similaridade >= LIMIAR_SIMILARIDADE:
+            similares.append(
+                {
+                    "usuario": outro_id,
+                    "nome": usuario["nome"],
+                    "similaridade": similaridade,
+                    "filmes_comuns": filmes_comuns,
+                }
+            )
+
+    similares.sort(
+        key=lambda item: -item["similaridade"]
+    )
+
+    return similares
+
+
+def recomendar_colaborativo(
+    usuario_id,
+    filmes,
+    usuarios,
+    avaliacoes,
+):
+    """
+    Recomenda filmes com base nas avaliações de usuários
+    semelhantes.
+
+    Filmes já avaliados pelo usuário são excluídos.
+    """
+
+    matriz = construir_matriz_avaliacoes(avaliacoes)
+
+    ja_avaliados = filmes_avaliados_por(
+        avaliacoes,
+        usuario_id,
+    )
+
+    similares = encontrar_usuarios_similares(
+        usuario_id,
+        usuarios,
+        matriz,
+    )
+
+    filmes_por_id = {
+        filme["id"]: filme
+        for filme in filmes
+    }
+
+    candidatos = {}
+
+    for vizinho in similares:
+        vizinho_id = vizinho["usuario"]
+        similaridade = vizinho["similaridade"]
+
+        notas_vizinho = matriz.get(vizinho_id, {})
+
+        for filme_id, nota in notas_vizinho.items():
+
+            if filme_id in ja_avaliados:
+                continue
+
+            if filme_id not in filmes_por_id:
+                continue
+
+            if filme_id not in candidatos:
+                candidatos[filme_id] = {
+                    "soma_ponderada": 0.0,
+                    "soma_similaridades": 0.0,
+                    "vizinhos": [],
+                }
+
+            # Normalizamos nota de 1-5 para 0-1.
+            nota_normalizada = nota / 5.0
+
+            candidatos[filme_id]["soma_ponderada"] += (
+                similaridade * nota_normalizada
+            )
+
+            candidatos[filme_id]["soma_similaridades"] += (
+                similaridade
+            )
+
+            candidatos[filme_id]["vizinhos"].append(
+                {
+                    "usuario": vizinho_id,
+                    "nome": vizinho["nome"],
+                    "similaridade": similaridade,
+                    "nota": nota,
+                }
+            )
+
+    recomendacoes = []
+
+    for filme_id, dados in candidatos.items():
+
+        if dados["soma_similaridades"] == 0:
+            continue
+
+        score = (
+            dados["soma_ponderada"]
+            / dados["soma_similaridades"]
+        )
+
+        filme = filmes_por_id[filme_id]
+
+        recomendacoes.append(
+            {
+                "filme": filme_id,
+                "titulo": (
+                    filme["titulo_portugues"]
+                    or filme["titulo_original"]
+                    or filme_id
+                ),
+                "score_colaborativo": score,
+                "vizinhos": dados["vizinhos"],
+            }
+        )
+
+    recomendacoes.sort(
+        key=lambda item: (
+            -item["score_colaborativo"],
+            item["titulo"],
+        )
+    )
+
+    return recomendacoes, similares
 
 def main():
     graph = carregar_ontologia()
@@ -171,7 +412,11 @@ def main():
         usuario_id,
     )
 
-    recomendacoes = recomendar_por_conteudo(
+    # -----------------------------------------------------
+    # Conteúdo
+    # -----------------------------------------------------
+
+    recomendacoes_conteudo = recomendar_por_conteudo(
         usuario_id,
         filmes,
         usuarios,
@@ -186,25 +431,72 @@ def main():
     print("=" * 70)
 
     for posicao, recomendacao in enumerate(
-        recomendacoes,
+        recomendacoes_conteudo[:5],
         start=1,
     ):
-        score = recomendacao["score_conteudo"]
-
         print(
             f"{posicao:2}. "
             f"{recomendacao['titulo']:<35} "
-            f"{score:.2f}"
+            f"{recomendacao['score_conteudo']:.2f}"
         )
 
-        if recomendacao["motivos"]:
+    # -----------------------------------------------------
+    # Colaborativo
+    # -----------------------------------------------------
+
+    recomendacoes_collab, similares = (
+        recomendar_colaborativo(
+            usuario_id,
+            filmes,
+            usuarios,
+            avaliacoes,
+        )
+    )
+
+    print()
+    print(
+        f"USUÁRIOS SIMILARES A {usuario['nome']}"
+    )
+    print("=" * 70)
+
+    if not similares:
+        print("Nenhum usuário semelhante encontrado.")
+
+    for vizinho in similares:
+        print(
+            f"- {vizinho['nome']:<15} "
+            f"similaridade={vizinho['similaridade']:.2f} "
+            f"filmes_comuns={vizinho['filmes_comuns']}"
+        )
+
+    print()
+    print(
+        f"RECOMENDAÇÕES COLABORATIVAS PARA "
+        f"{usuario['nome']}"
+    )
+    print("=" * 70)
+
+    if not recomendacoes_collab:
+        print(
+            "Não há recomendações colaborativas "
+            "com evidência suficiente."
+        )
+
+    for posicao, recomendacao in enumerate(
+        recomendacoes_collab,
+        start=1,
+    ):
+        print(
+            f"{posicao:2}. "
+            f"{recomendacao['titulo']:<35} "
+            f"{recomendacao['score_colaborativo']:.2f}"
+        )
+
+        for vizinho in recomendacao["vizinhos"]:
             print(
-                "    Correspondências: "
-                + "; ".join(recomendacao["motivos"])
-            )
-        else:
-            print(
-                "    Correspondências: nenhuma"
+                f"    {vizinho['nome']} "
+                f"(sim={vizinho['similaridade']:.2f}) "
+                f"deu nota {vizinho['nota']:.0f}"
             )
 
 
