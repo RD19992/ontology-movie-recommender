@@ -1,0 +1,10 @@
+@prefix ns1: <http://www.semanticweb.org/renan/ontologia-filmes5/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+ns1:Avaliacao_UsuarioAna_PrincesaMononoke a ns1:Avaliacao,
+        owl:NamedIndividual ;
+    ns1:avaliaFilme ns1:PrincesaMononoke ;
+    ns1:avaliacaoFeitaPor ns1:UsuarioAna ;
+    ns1:notaEstrelas 5 .
+
