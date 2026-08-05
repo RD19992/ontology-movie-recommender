@@ -8,6 +8,29 @@ ns1:Avaliacao_UsuarioAna_PrincesaMononoke a ns1:Avaliacao,
     ns1:avaliacaoFeitaPor ns1:UsuarioAna ;
     ns1:notaEstrelas 5 .
 
+ns1:DocumentarioTeste2025 a ns1:FilmeDocumentario,
+        owl:NamedIndividual ;
+    ns1:anoLancamento 2026 ;
+    ns1:anoProducao 2025 ;
+    ns1:pertenceAoGenero ns1:Documentario ;
+    ns1:temDiretor ns1:PetraCosta ;
+    ns1:temIdiomaFilme ns1:Portugues ;
+    ns1:temNacionalidadeFilme ns1:Brasil ;
+    ns1:tituloOriginal "Documentario Teste"^^xsd:string ;
+    ns1:tituloPortugues "Filme Teste Semântico"^^xsd:string .
+
+ns1:FilmeTesteSemantico2025 a ns1:Filme,
+        owl:NamedIndividual ;
+    ns1:anoLancamento 2026 ;
+    ns1:anoProducao 2025 ;
+    ns1:pertenceAoGenero ns1:Drama ;
+    ns1:temAtor ns1:FernandaTorres ;
+    ns1:temDiretor ns1:WalterSalles ;
+    ns1:temIdiomaFilme ns1:Portugues ;
+    ns1:temNacionalidadeFilme ns1:Brasil ;
+    ns1:tituloOriginal "Filme Teste Semantico"^^xsd:string ;
+    ns1:tituloPortugues "Filme Teste Semântico"^^xsd:string .
+
 ns1:UsuarioMarinaTeste a ns1:Usuario,
         owl:NamedIndividual ;
     ns1:emailUsuario "marina@example.org"^^xsd:string ;

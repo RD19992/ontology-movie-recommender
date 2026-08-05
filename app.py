@@ -58,6 +58,81 @@ opcoes_filme = listar_opcoes_filme(
     graph
 )
 
+def filtrar_catalogo(
+    filmes,
+    texto="",
+    generos=None,
+    diretores=None,
+    atores=None,
+    paises=None,
+    idiomas=None,
+):
+    """
+    Filtra o catálogo usando os metadados extraídos
+    da ontologia.
+    """
+
+    generos = generos or []
+    diretores = diretores or []
+    atores = atores or []
+    paises = paises or []
+    idiomas = idiomas or []
+
+    texto = texto.strip().lower()
+
+    resultados = []
+
+    for filme in filmes:
+
+        titulos = [
+            filme["id"],
+            filme["titulo_original"] or "",
+            filme["titulo_portugues"] or "",
+        ]
+
+        if texto:
+            if not any(
+                texto in str(titulo).lower()
+                for titulo in titulos
+            ):
+                continue
+
+        if generos and not (
+            set(generos) & set(filme["generos"])
+        ):
+            continue
+
+        if diretores and not (
+            set(diretores) & set(filme["diretores"])
+        ):
+            continue
+
+        if atores and not (
+            set(atores) & set(filme["atores"])
+        ):
+            continue
+
+        if paises and not (
+            set(paises) & set(filme["paises"])
+        ):
+            continue
+
+        if idiomas and not (
+            set(idiomas) & set(filme["idiomas"])
+        ):
+            continue
+
+        resultados.append(filme)
+
+    return sorted(
+        resultados,
+        key=lambda filme: (
+            filme["titulo_portugues"]
+            or filme["titulo_original"]
+            or filme["id"]
+        ),
+    )
+
 # ---------------------------------------------------------
 # Cabeçalho
 # ---------------------------------------------------------
@@ -166,6 +241,18 @@ if metodo == "Conteúdo":
         avaliacoes,
     )
 
+    recomendacoes = [
+        item
+        for item in recomendacoes
+        if item["score_conteudo"] > 0
+    ]
+
+    if not recomendacoes:
+        st.info(
+            "Não há filmes não avaliados com afinidade "
+            "de conteúdo para este usuário."
+        )
+
     for posicao, item in enumerate(
         recomendacoes[:top_n],
         start=1,
@@ -242,6 +329,18 @@ else:
             avaliacoes,
         )
     )
+
+    recomendacoes = [
+        item
+        for item in recomendacoes
+        if item["score_final"] > 0
+    ]
+
+    if not recomendacoes:
+        st.info(
+            "Não há recomendações com evidência "
+            "suficiente para este usuário."
+        )
 
     for posicao, item in enumerate(
         recomendacoes[:top_n],
@@ -588,3 +687,116 @@ with st.expander(
 
             except ValueError as erro:
                 st.error(str(erro))
+
+# ---------------------------------------------------------
+# Exploração do catálogo
+# ---------------------------------------------------------
+
+st.divider()
+st.header("Explorar catálogo")
+
+st.write(
+    "Consulte os filmes utilizando propriedades "
+    "semânticas da ontologia."
+)
+
+texto_busca = st.text_input(
+    "Buscar por título",
+    key="busca_catalogo",
+)
+
+col_filtro1, col_filtro2 = st.columns(2)
+
+with col_filtro1:
+
+    filtro_generos = st.multiselect(
+        "Filtrar por gênero",
+        options=opcoes_filme["generos"],
+        key="filtro_generos",
+    )
+
+    filtro_diretores = st.multiselect(
+        "Filtrar por diretor",
+        options=opcoes_filme["diretores"],
+        key="filtro_diretores",
+    )
+
+    filtro_atores = st.multiselect(
+        "Filtrar por ator",
+        options=opcoes_filme["atores"],
+        key="filtro_atores",
+    )
+
+with col_filtro2:
+
+    filtro_paises = st.multiselect(
+        "Filtrar por nacionalidade",
+        options=opcoes_filme["paises"],
+        key="filtro_paises",
+    )
+
+    filtro_idiomas = st.multiselect(
+        "Filtrar por idioma",
+        options=opcoes_filme["idiomas"],
+        key="filtro_idiomas",
+    )
+
+
+resultados_catalogo = filtrar_catalogo(
+    filmes=filmes,
+    texto=texto_busca,
+    generos=filtro_generos,
+    diretores=filtro_diretores,
+    atores=filtro_atores,
+    paises=filtro_paises,
+    idiomas=filtro_idiomas,
+)
+
+
+st.subheader(
+    f"Resultados: {len(resultados_catalogo)}"
+)
+
+
+if resultados_catalogo:
+
+    linhas_catalogo = []
+
+    for filme in resultados_catalogo:
+
+        linhas_catalogo.append(
+            {
+                "Título": (
+                    filme["titulo_portugues"]
+                    or filme["titulo_original"]
+                    or filme["id"]
+                ),
+                "Ano": filme["ano_producao"],
+                "Gênero": ", ".join(
+                    filme["generos"]
+                ),
+                "Diretor": ", ".join(
+                    filme["diretores"]
+                ),
+                "Ator": ", ".join(
+                    filme["atores"]
+                ),
+                "País": ", ".join(
+                    filme["paises"]
+                ),
+                "Idioma": ", ".join(
+                    filme["idiomas"]
+                ),
+            }
+        )
+
+    st.dataframe(
+        linhas_catalogo,
+        use_container_width=True,
+        hide_index=True,
+    )
+
+else:
+    st.info(
+        "Nenhum filme corresponde aos filtros selecionados."
+    )
