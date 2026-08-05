@@ -21,6 +21,10 @@ MIN_FILMES_COMUNS = 2
 LIMIAR_SIMILARIDADE = 0.40
 FILMES_PARA_CONFIANCA_MAXIMA = 3
 
+# Parâmetros para modelo híbrido
+PESO_HIBRIDO_CONTEUDO = 0.60
+PESO_HIBRIDO_COLABORATIVO = 0.40
+
 def encontrar_usuario(usuarios, usuario_id):
     """
     Localiza um usuário pelo ID da ontologia.
@@ -398,6 +402,96 @@ def recomendar_colaborativo(
 
     return recomendacoes, similares
 
+# ---------------------------------------------------------
+# Recomendação híbrida
+# ---------------------------------------------------------
+
+def recomendar_hibrido(
+    usuario_id,
+    filmes,
+    usuarios,
+    avaliacoes,
+):
+    """
+    Combina recomendação baseada em conteúdo e
+    filtragem colaborativa.
+
+    Quando há evidência dos dois métodos:
+        60% conteúdo + 40% colaborativo.
+
+    Quando não existe evidência colaborativa para um filme,
+    utiliza somente o score de conteúdo.
+    """
+
+    recomendacoes_conteudo = recomendar_por_conteudo(
+        usuario_id,
+        filmes,
+        usuarios,
+        avaliacoes,
+    )
+
+    recomendacoes_collab, similares = recomendar_colaborativo(
+        usuario_id,
+        filmes,
+        usuarios,
+        avaliacoes,
+    )
+
+    # Facilita consultar o score colaborativo por filme.
+    collab_por_filme = {
+        item["filme"]: item
+        for item in recomendacoes_collab
+    }
+
+    recomendacoes = []
+
+    for item_conteudo in recomendacoes_conteudo:
+        filme_id = item_conteudo["filme"]
+        score_conteudo = item_conteudo["score_conteudo"]
+
+        item_collab = collab_por_filme.get(filme_id)
+
+        if item_collab is not None:
+            score_collab = item_collab["score_colaborativo"]
+
+            score_final = (
+                PESO_HIBRIDO_CONTEUDO * score_conteudo
+                + PESO_HIBRIDO_COLABORATIVO * score_collab
+            )
+
+            origem = "conteúdo + colaborativo"
+            vizinhos = item_collab["vizinhos"]
+
+        else:
+            # Não penaliza um filme apenas porque ainda
+            # não existe informação colaborativa suficiente.
+            score_collab = None
+            score_final = score_conteudo
+            origem = "somente conteúdo"
+            vizinhos = []
+
+        recomendacoes.append(
+            {
+                "filme": filme_id,
+                "titulo": item_conteudo["titulo"],
+                "score_conteudo": score_conteudo,
+                "score_colaborativo": score_collab,
+                "score_final": score_final,
+                "origem": origem,
+                "motivos_conteudo": item_conteudo["motivos"],
+                "vizinhos": vizinhos,
+            }
+        )
+
+    recomendacoes.sort(
+        key=lambda item: (
+            -item["score_final"],
+            item["titulo"],
+        )
+    )
+
+    return recomendacoes, similares
+
 def main():
     graph = carregar_ontologia()
 
@@ -424,80 +518,81 @@ def main():
     )
 
     print()
-    print(
-        f"RECOMENDAÇÕES POR CONTEÚDO PARA "
-        f"{usuario['nome']}"
-    )
+    print(f"CONTEÚDO - {usuario['nome']}")
     print("=" * 70)
 
-    for posicao, recomendacao in enumerate(
+    for posicao, item in enumerate(
         recomendacoes_conteudo[:5],
         start=1,
     ):
         print(
             f"{posicao:2}. "
-            f"{recomendacao['titulo']:<35} "
-            f"{recomendacao['score_conteudo']:.2f}"
+            f"{item['titulo']:<35} "
+            f"{item['score_conteudo']:.2f}"
         )
 
     # -----------------------------------------------------
     # Colaborativo
     # -----------------------------------------------------
 
-    recomendacoes_collab, similares = (
-        recomendar_colaborativo(
-            usuario_id,
-            filmes,
-            usuarios,
-            avaliacoes,
-        )
+    recomendacoes_collab, similares = recomendar_colaborativo(
+        usuario_id,
+        filmes,
+        usuarios,
+        avaliacoes,
     )
 
     print()
-    print(
-        f"USUÁRIOS SIMILARES A {usuario['nome']}"
-    )
+    print(f"COLABORATIVO - {usuario['nome']}")
     print("=" * 70)
 
-    if not similares:
-        print("Nenhum usuário semelhante encontrado.")
-
-    for vizinho in similares:
-        print(
-            f"- {vizinho['nome']:<15} "
-            f"similaridade={vizinho['similaridade']:.2f} "
-            f"filmes_comuns={vizinho['filmes_comuns']}"
-        )
-
-    print()
-    print(
-        f"RECOMENDAÇÕES COLABORATIVAS PARA "
-        f"{usuario['nome']}"
-    )
-    print("=" * 70)
-
-    if not recomendacoes_collab:
-        print(
-            "Não há recomendações colaborativas "
-            "com evidência suficiente."
-        )
-
-    for posicao, recomendacao in enumerate(
-        recomendacoes_collab,
+    for posicao, item in enumerate(
+        recomendacoes_collab[:5],
         start=1,
     ):
         print(
             f"{posicao:2}. "
-            f"{recomendacao['titulo']:<35} "
-            f"{recomendacao['score_colaborativo']:.2f}"
+            f"{item['titulo']:<35} "
+            f"{item['score_colaborativo']:.2f}"
         )
 
-        for vizinho in recomendacao["vizinhos"]:
-            print(
-                f"    {vizinho['nome']} "
-                f"(sim={vizinho['similaridade']:.2f}) "
-                f"deu nota {vizinho['nota']:.0f}"
-            )
+    # -----------------------------------------------------
+    # Híbrido
+    # -----------------------------------------------------
+
+    recomendacoes_hibridas, _ = recomendar_hibrido(
+        usuario_id,
+        filmes,
+        usuarios,
+        avaliacoes,
+    )
+
+    print()
+    print(f"HÍBRIDO - {usuario['nome']}")
+    print("=" * 70)
+
+    for posicao, item in enumerate(
+        recomendacoes_hibridas[:5],
+        start=1,
+    ):
+        collab = item["score_colaborativo"]
+
+        if collab is None:
+            collab_texto = "-"
+        else:
+            collab_texto = f"{collab:.2f}"
+
+        print(
+            f"{posicao:2}. "
+            f"{item['titulo']:<30} "
+            f"final={item['score_final']:.2f} "
+            f"conteúdo={item['score_conteudo']:.2f} "
+            f"collab={collab_texto}"
+        )
+
+        print(
+            f"    Origem: {item['origem']}"
+        )
 
 
 if __name__ == "__main__":
