@@ -8,6 +8,12 @@ ns1:Avaliacao_UsuarioAna_PrincesaMononoke a ns1:Avaliacao,
     ns1:avaliacaoFeitaPor ns1:UsuarioAna ;
     ns1:notaEstrelas 5 .
 
+ns1:Avaliacao_UsuarioFelipe_DemocraciaEmVertigem a ns1:Avaliacao,
+        owl:NamedIndividual ;
+    ns1:avaliaFilme ns1:DemocraciaEmVertigem ;
+    ns1:avaliacaoFeitaPor ns1:UsuarioFelipe ;
+    ns1:notaEstrelas 4 .
+
 ns1:DocumentarioTeste2025 a ns1:FilmeDocumentario,
         owl:NamedIndividual ;
     ns1:anoLancamento 2026 ;
