@@ -8,3 +8,14 @@ ns1:Avaliacao_UsuarioAna_PrincesaMononoke a ns1:Avaliacao,
     ns1:avaliacaoFeitaPor ns1:UsuarioAna ;
     ns1:notaEstrelas 5 .
 
+ns1:UsuarioMarinaTeste a ns1:Usuario,
+        owl:NamedIndividual ;
+    ns1:emailUsuario "marina@example.org"^^xsd:string ;
+    ns1:idadeUsuario 28 ;
+    ns1:nomeUsuario "Marina Teste"^^xsd:string ;
+    ns1:prefereAtor ns1:PenelopeCruz ;
+    ns1:prefereDiretor ns1:PedroAlmodovar ;
+    ns1:prefereGenero ns1:Drama ;
+    ns1:prefereIdioma ns1:Espanhol ;
+    ns1:prefereNacionalidade ns1:Espanha .
+

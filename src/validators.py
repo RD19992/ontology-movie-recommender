@@ -98,3 +98,71 @@ def validar_preferencias_usuario(preferencias):
         )
 
     return True
+
+def validar_titulo_filme(titulo):
+    """Título original é obrigatório."""
+    if not isinstance(titulo, str):
+        raise ValueError("O título deve ser texto.")
+
+    if len(titulo.strip()) < 1:
+        raise ValueError("Informe o título original do filme.")
+
+    return True
+
+
+def validar_ano_filme(ano):
+    """Validação operacional simples do ano."""
+    if not isinstance(ano, int):
+        raise ValueError("O ano deve ser um número inteiro.")
+
+    if ano < 1888 or ano > 2100:
+        raise ValueError("Informe um ano de produção válido.")
+
+    return True
+
+
+def validar_relacoes_filme(
+    generos,
+    diretores,
+    atores,
+):
+    """
+    Regras principais da ontologia/aplicação.
+
+    - Todo filme tem pelo menos um gênero.
+    - Todo filme tem pelo menos um diretor.
+    - Documentário tem exatamente um diretor e nenhum ator.
+    - Filme não documentário tem pelo menos um ator.
+    """
+    if not generos:
+        raise ValueError(
+            "Selecione pelo menos um gênero."
+        )
+
+    if not diretores:
+        raise ValueError(
+            "Selecione pelo menos um diretor."
+        )
+
+    documentario = "Documentario" in generos
+
+    if documentario:
+        if len(diretores) != 1:
+            raise ValueError(
+                "Documentário deve ter exatamente um diretor."
+            )
+
+        if atores:
+            raise ValueError(
+                "Documentário não deve possuir ator "
+                "nesta modelagem."
+            )
+
+    else:
+        if not atores:
+            raise ValueError(
+                "Filme não documentário deve possuir "
+                "pelo menos um ator."
+            )
+
+    return True

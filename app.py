@@ -8,6 +8,8 @@ from src.ontology_service import (
     registrar_avaliacao,
     registrar_usuario,
     listar_opcoes_preferencia,
+    registrar_filme,
+    listar_opcoes_filme,
 )
 
 from src.recommender import (
@@ -49,6 +51,10 @@ filmes_por_id = {
 }
 
 opcoes_preferencia = listar_opcoes_preferencia(
+    graph
+)
+
+opcoes_filme = listar_opcoes_filme(
     graph
 )
 
@@ -459,6 +465,122 @@ with st.expander(
                 st.session_state["mensagem"] = (
                     f"Usuário "
                     f"{resultado['nome']} "
+                    f"cadastrado com sucesso."
+                )
+
+                st.rerun()
+
+            except ValueError as erro:
+                st.error(str(erro))
+
+# ---------------------------------------------------------
+# Cadastro de filme
+# ---------------------------------------------------------
+
+st.divider()
+st.header("Cadastrar novo filme")
+
+with st.expander(
+    "Novo filme",
+    expanded=False,
+):
+
+    with st.form("cadastro_filme"):
+
+        titulo_original_novo = st.text_input(
+            "Título original"
+        )
+
+        titulo_portugues_novo = st.text_input(
+            "Título em português (opcional)"
+        )
+
+        col_ano1, col_ano2 = st.columns(2)
+
+        ano_producao_novo = col_ano1.number_input(
+            "Ano de produção",
+            min_value=1888,
+            max_value=2100,
+            value=2025,
+            step=1,
+        )
+
+        ano_lancamento_novo = col_ano2.number_input(
+            "Ano de lançamento",
+            min_value=1888,
+            max_value=2100,
+            value=2025,
+            step=1,
+        )
+
+        generos_novo_filme = st.multiselect(
+            "Gêneros",
+            options=opcoes_filme["generos"],
+        )
+
+        diretores_novo_filme = st.multiselect(
+            "Diretores",
+            options=opcoes_filme["diretores"],
+        )
+
+        atores_novo_filme = st.multiselect(
+            "Atores",
+            options=opcoes_filme["atores"],
+        )
+
+        roteiristas_novo_filme = st.multiselect(
+            "Roteiristas",
+            options=opcoes_filme["roteiristas"],
+        )
+
+        paises_novo_filme = st.multiselect(
+            "Países",
+            options=opcoes_filme["paises"],
+        )
+
+        idiomas_novo_filme = st.multiselect(
+            "Idiomas",
+            options=opcoes_filme["idiomas"],
+        )
+
+        cadastrar_filme = (
+            st.form_submit_button(
+                "Cadastrar filme"
+            )
+        )
+
+        if cadastrar_filme:
+
+            try:
+
+                resultado = registrar_filme(
+                    titulo_original=(
+                        titulo_original_novo
+                    ),
+                    titulo_portugues=(
+                        titulo_portugues_novo
+                    ),
+                    ano_producao=int(
+                        ano_producao_novo
+                    ),
+                    ano_lancamento=int(
+                        ano_lancamento_novo
+                    ),
+                    generos=generos_novo_filme,
+                    diretores=diretores_novo_filme,
+                    atores=atores_novo_filme,
+                    roteiristas=(
+                        roteiristas_novo_filme
+                    ),
+                    paises=paises_novo_filme,
+                    idiomas=idiomas_novo_filme,
+                )
+
+                st.session_state[
+                    "mensagem"
+                ] = (
+                    f"Filme "
+                    f"{resultado['titulo']} "
                     f"cadastrado com sucesso."
                 )
 

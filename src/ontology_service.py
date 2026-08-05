@@ -21,6 +21,9 @@ from src.validators import (
     validar_idade_usuario,
     validar_contato_usuario,
     validar_preferencias_usuario,
+    validar_titulo_filme,
+    validar_ano_filme,
+    validar_relacoes_filme,
 )
 
 # ---------------------------------------------------------
@@ -559,6 +562,92 @@ def gerar_id_usuario(nome):
 
     return "Usuario" + identificador
 
+def gerar_id_filme(titulo, ano):
+    """
+    Gera um identificador RDF simples e previsível.
+
+    Exemplo:
+        O Auto da Compadecida, 2000
+        -> OAutoDaCompadecida2000
+    """
+
+    texto = unicodedata.normalize(
+        "NFKD",
+        titulo.strip(),
+    ).encode(
+        "ascii",
+        "ignore",
+    ).decode("ascii")
+
+    partes = re.findall(
+        r"[A-Za-z0-9]+",
+        texto,
+    )
+
+    if not partes:
+        raise ValueError(
+            "Não foi possível gerar um identificador "
+            "para o filme."
+        )
+
+    identificador = "".join(
+        parte[:1].upper() + parte[1:]
+        for parte in partes
+    )
+
+    return f"{identificador}{ano}"
+
+def listar_opcoes_filme(graph):
+    """
+    Retorna indivíduos existentes que podem ser usados
+    nas relações de um novo filme.
+    """
+
+    return {
+        "generos": [
+            local_name(item)
+            for item in listar_individuos(
+                graph,
+                "Genero",
+            )
+        ],
+        "diretores": [
+            local_name(item)
+            for item in listar_individuos(
+                graph,
+                "Diretor",
+            )
+        ],
+        "atores": [
+            local_name(item)
+            for item in listar_individuos(
+                graph,
+                "Ator",
+            )
+        ],
+        "roteiristas": [
+            local_name(item)
+            for item in listar_individuos(
+                graph,
+                "Roteirista",
+            )
+        ],
+        "paises": [
+            local_name(item)
+            for item in listar_individuos(
+                graph,
+                "Pais",
+            )
+        ],
+        "idiomas": [
+            local_name(item)
+            for item in listar_individuos(
+                graph,
+                "Idioma",
+            )
+        ],
+    }
+
 def listar_opcoes_preferencia(graph):
     """
     Retorna os indivíduos que podem ser escolhidos
@@ -679,6 +768,207 @@ def registrar_usuario(
             APP_DATA_PATH,
             format="turtle",
         )
+
+    def registrar_filme(
+            titulo_original,
+            ano_producao,
+            generos,
+            diretores,
+            atores,
+            titulo_portugues="",
+            ano_lancamento=None,
+            roteiristas=None,
+            paises=None,
+            idiomas=None,
+    ):
+        """
+        Cria um novo indivíduo Filme ou FilmeDocumentario
+        e persiste suas propriedades em app_data.ttl.
+        """
+
+        roteiristas = roteiristas or []
+        paises = paises or []
+        idiomas = idiomas or []
+
+        titulo_original = titulo_original.strip()
+        titulo_portugues = titulo_portugues.strip()
+
+        validar_titulo_filme(
+            titulo_original
+        )
+
+        validar_ano_filme(
+            ano_producao
+        )
+
+        validar_relacoes_filme(
+            generos=generos,
+            diretores=diretores,
+            atores=atores,
+        )
+
+        graph = carregar_ontologia()
+
+        filme_id = gerar_id_filme(
+            titulo_original,
+            ano_producao,
+        )
+
+        filmes_existentes = {
+            filme["id"]
+            for filme in obter_filmes(graph)
+        }
+
+        if filme_id in filmes_existentes:
+            raise ValueError(
+                "Este filme já está cadastrado."
+            )
+
+        documentario = (
+                "Documentario" in generos
+        )
+
+        if documentario:
+            classe_filme = encontrar_classe(
+                graph,
+                "FilmeDocumentario",
+            )
+        else:
+            classe_filme = encontrar_classe(
+                graph,
+                "Filme",
+            )
+
+        filme_uri = uri_novo_individuo(
+            graph,
+            classe_filme,
+            filme_id,
+        )
+
+        data_graph = Graph()
+
+        if APP_DATA_PATH.exists():
+            data_graph.parse(
+                APP_DATA_PATH,
+                format="turtle",
+            )
+
+        # -----------------------------------------------------
+        # Tipos
+        # -----------------------------------------------------
+
+        data_graph.add(
+            (
+                filme_uri,
+                RDF.type,
+                OWL.NamedIndividual,
+            )
+        )
+
+        data_graph.add(
+            (
+                filme_uri,
+                RDF.type,
+                classe_filme,
+            )
+        )
+
+        # -----------------------------------------------------
+        # Data properties
+        # -----------------------------------------------------
+
+        propriedades_literais = {
+            "tituloOriginal": (
+                titulo_original,
+                XSD.string,
+            ),
+            "anoProducao": (
+                ano_producao,
+                XSD.integer,
+            ),
+        }
+
+        if titulo_portugues:
+            propriedades_literais[
+                "tituloPortugues"
+            ] = (
+                titulo_portugues,
+                XSD.string,
+            )
+
+        if ano_lancamento is not None:
+            propriedades_literais[
+                "anoLancamento"
+            ] = (
+                int(ano_lancamento),
+                XSD.integer,
+            )
+
+        for nome_prop, (
+                valor,
+                datatype,
+        ) in propriedades_literais.items():
+            propriedade = encontrar_entidade(
+                graph,
+                nome_prop,
+            )
+
+            data_graph.add(
+                (
+                    filme_uri,
+                    propriedade,
+                    Literal(
+                        valor,
+                        datatype=datatype,
+                    ),
+                )
+            )
+
+        # -----------------------------------------------------
+        # Object properties
+        # -----------------------------------------------------
+
+        relacoes = {
+            "pertenceAoGenero": generos,
+            "temDiretor": diretores,
+            "temAtor": atores,
+            "temRoteirista": roteiristas,
+            "temNacionalidadeFilme": paises,
+            "temIdiomaFilme": idiomas,
+        }
+
+        for nome_prop, valores in relacoes.items():
+
+            propriedade = encontrar_entidade(
+                graph,
+                nome_prop,
+            )
+
+            for valor_id in valores:
+                valor_uri = encontrar_entidade(
+                    graph,
+                    valor_id,
+                )
+
+                data_graph.add(
+                    (
+                        filme_uri,
+                        propriedade,
+                        valor_uri,
+                    )
+                )
+
+        data_graph.serialize(
+            destination=APP_DATA_PATH,
+            format="turtle",
+        )
+
+        return {
+            "id": filme_id,
+            "titulo": titulo_original,
+            "ano": ano_producao,
+            "documentario": documentario,
+        }
 
     # -----------------------------------------------------
     # Tipo
