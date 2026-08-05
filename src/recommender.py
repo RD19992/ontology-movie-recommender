@@ -1,4 +1,4 @@
-from ontology_service import (
+from src.ontology_service import (
     carregar_ontologia,
     obter_filmes,
     obter_usuarios,

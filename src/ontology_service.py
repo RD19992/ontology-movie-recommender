@@ -10,7 +10,7 @@ from rdflib import (
     XSD,
 )
 
-from validators import (
+from src.validators import (
     validar_nota,
     validar_usuario_existe,
     validar_filme_existe,

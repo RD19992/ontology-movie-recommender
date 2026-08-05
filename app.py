@@ -1,0 +1,362 @@
+import streamlit as st
+
+from src.ontology_service import (
+    carregar_ontologia,
+    obter_filmes,
+    obter_usuarios,
+    obter_avaliacoes,
+    registrar_avaliacao,
+)
+
+from src.recommender import (
+    recomendar_por_conteudo,
+    recomendar_colaborativo,
+    recomendar_hibrido,
+)
+
+
+# ---------------------------------------------------------
+# Configuração
+# ---------------------------------------------------------
+
+st.set_page_config(
+    page_title="Ontology Movie Recommender",
+    page_icon="🎬",
+    layout="wide",
+)
+
+
+# ---------------------------------------------------------
+# Carregamento dos dados
+# ---------------------------------------------------------
+
+graph = carregar_ontologia()
+
+filmes = obter_filmes(graph)
+usuarios = obter_usuarios(graph)
+avaliacoes = obter_avaliacoes(graph)
+
+usuarios_por_id = {
+    usuario["id"]: usuario
+    for usuario in usuarios
+}
+
+filmes_por_id = {
+    filme["id"]: filme
+    for filme in filmes
+}
+
+
+# ---------------------------------------------------------
+# Cabeçalho
+# ---------------------------------------------------------
+
+st.title("🎬 Ontology Movie Recommender")
+
+st.caption(
+    "Sistema híbrido de recomendação baseado em "
+    "ontologia OWL/RDF e filtragem colaborativa."
+)
+
+if "mensagem" in st.session_state:
+    st.success(
+        st.session_state.pop("mensagem")
+    )
+
+
+# ---------------------------------------------------------
+# Seleção do usuário
+# ---------------------------------------------------------
+
+st.sidebar.header("Usuário")
+
+usuario_id = st.sidebar.selectbox(
+    "Selecione o usuário",
+    options=list(usuarios_por_id.keys()),
+    format_func=lambda uid: usuarios_por_id[uid]["nome"],
+)
+
+usuario = usuarios_por_id[usuario_id]
+
+
+# ---------------------------------------------------------
+# Método
+# ---------------------------------------------------------
+
+st.sidebar.header("Método de recomendação")
+
+metodo = st.sidebar.radio(
+    "Modelo",
+    options=[
+        "Híbrido",
+        "Conteúdo",
+        "Colaborativo",
+    ],
+)
+
+top_n = st.sidebar.slider(
+    "Número de recomendações",
+    min_value=1,
+    max_value=10,
+    value=5,
+)
+
+
+# ---------------------------------------------------------
+# Perfil
+# ---------------------------------------------------------
+
+st.subheader(f"Perfil de {usuario['nome']}")
+
+preferencias = usuario["preferencias"]
+
+col1, col2, col3, col4, col5 = st.columns(5)
+
+col1.metric(
+    "Gêneros",
+    ", ".join(preferencias["generos"]) or "—",
+)
+
+col2.metric(
+    "Diretores",
+    ", ".join(preferencias["diretores"]) or "—",
+)
+
+col3.metric(
+    "Atores",
+    ", ".join(preferencias["atores"]) or "—",
+)
+
+col4.metric(
+    "Nacionalidades",
+    ", ".join(preferencias["nacionalidades"]) or "—",
+)
+
+col5.metric(
+    "Idiomas",
+    ", ".join(preferencias["idiomas"]) or "—",
+)
+
+
+# ---------------------------------------------------------
+# Recomendação
+# ---------------------------------------------------------
+
+st.divider()
+st.header(f"Recomendações — {metodo}")
+
+
+if metodo == "Conteúdo":
+
+    recomendacoes = recomendar_por_conteudo(
+        usuario_id,
+        filmes,
+        usuarios,
+        avaliacoes,
+    )
+
+    for posicao, item in enumerate(
+        recomendacoes[:top_n],
+        start=1,
+    ):
+        st.subheader(
+            f"{posicao}. {item['titulo']}"
+        )
+
+        st.write(
+            f"**Score:** "
+            f"{item['score_conteudo']:.2f}"
+        )
+
+        if item["motivos"]:
+            st.write(
+                "**Correspondências:** "
+                + "; ".join(item["motivos"])
+            )
+        else:
+            st.write(
+                "Nenhuma correspondência explícita."
+            )
+
+
+elif metodo == "Colaborativo":
+
+    recomendacoes, similares = (
+        recomendar_colaborativo(
+            usuario_id,
+            filmes,
+            usuarios,
+            avaliacoes,
+        )
+    )
+
+    if not recomendacoes:
+        st.info(
+            "Não há evidência colaborativa suficiente "
+            "para este usuário."
+        )
+
+    for posicao, item in enumerate(
+        recomendacoes[:top_n],
+        start=1,
+    ):
+        st.subheader(
+            f"{posicao}. {item['titulo']}"
+        )
+
+        st.write(
+            f"**Score colaborativo:** "
+            f"{item['score_colaborativo']:.2f}"
+        )
+
+        with st.expander(
+            "Ver usuários que influenciaram"
+        ):
+            for vizinho in item["vizinhos"]:
+                st.write(
+                    f"{vizinho['nome']} — "
+                    f"similaridade "
+                    f"{vizinho['similaridade']:.2f}, "
+                    f"nota {vizinho['nota']:.0f}"
+                )
+
+
+else:
+
+    recomendacoes, similares = (
+        recomendar_hibrido(
+            usuario_id,
+            filmes,
+            usuarios,
+            avaliacoes,
+        )
+    )
+
+    for posicao, item in enumerate(
+        recomendacoes[:top_n],
+        start=1,
+    ):
+        st.subheader(
+            f"{posicao}. {item['titulo']}"
+        )
+
+        col_score, col_content, col_collab = (
+            st.columns(3)
+        )
+
+        col_score.metric(
+            "Score final",
+            f"{item['score_final']:.2f}",
+        )
+
+        col_content.metric(
+            "Conteúdo",
+            f"{item['score_conteudo']:.2f}",
+        )
+
+        if item["score_colaborativo"] is None:
+            collab_texto = "—"
+        else:
+            collab_texto = (
+                f"{item['score_colaborativo']:.2f}"
+            )
+
+        col_collab.metric(
+            "Colaborativo",
+            collab_texto,
+        )
+
+        st.caption(
+            f"Origem: {item['origem']}"
+        )
+
+        if item["motivos_conteudo"]:
+            st.write(
+                "**Afinidades semânticas:** "
+                + "; ".join(
+                    item["motivos_conteudo"]
+                )
+            )
+
+
+# ---------------------------------------------------------
+# Nova avaliação
+# ---------------------------------------------------------
+
+st.divider()
+st.header("Avaliar um filme")
+
+
+ja_avaliados = {
+    avaliacao["filme"]
+    for avaliacao in avaliacoes
+    if avaliacao["usuario"] == usuario_id
+}
+
+filmes_nao_avaliados = [
+    filme
+    for filme in filmes
+    if filme["id"] not in ja_avaliados
+]
+
+
+if filmes_nao_avaliados:
+
+    ids_disponiveis = [
+        filme["id"]
+        for filme in filmes_nao_avaliados
+    ]
+
+    with st.form("nova_avaliacao"):
+
+        filme_id = st.selectbox(
+            "Filme",
+            options=ids_disponiveis,
+            format_func=lambda fid: (
+                filmes_por_id[fid]["titulo_portugues"]
+                or filmes_por_id[fid]["titulo_original"]
+                or fid
+            ),
+        )
+
+        nota = st.slider(
+            "Nota",
+            min_value=1,
+            max_value=5,
+            value=3,
+        )
+
+        enviar = st.form_submit_button(
+            "Salvar avaliação"
+        )
+
+        if enviar:
+            try:
+                resultado = registrar_avaliacao(
+                    usuario_id=usuario_id,
+                    filme_id=filme_id,
+                    nota=nota,
+                )
+
+                titulo = (
+                    filmes_por_id[filme_id][
+                        "titulo_portugues"
+                    ]
+                    or filme_id
+                )
+
+                st.session_state["mensagem"] = (
+                    f"Avaliação registrada: "
+                    f"{titulo} — {nota}/5."
+                )
+
+                st.rerun()
+
+            except ValueError as erro:
+                st.error(str(erro))
+
+else:
+    st.info(
+        "Este usuário já avaliou todos os filmes "
+        "do catálogo."
+    )
